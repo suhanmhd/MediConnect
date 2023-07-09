@@ -53,7 +53,7 @@ public class AppointmentService {
     public void appointmentBooking(AppointmentReq appointmentReq) {
         System.out.println(appointmentReq.getDocId());
         System.out.println(appointmentReq.getUserId());
-        Map<String, Object> response = new HashMap<>();
+
 
 
          Appointment appointment = Appointment.builder()
@@ -68,14 +68,15 @@ public class AppointmentService {
                  .time(appointmentReq.getTime())
                  .build();
 
-        appointmentRepository.save(appointment);
+//        appointmentRepository.save(appointment);
 
         System.out.println(appointment.getUserId()+"  ______"+appointment.getDoctorId());
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
        long amount = appointment.getAmount();
 
-           response = generateRazorpay(appointment.getId(), amount);
+        Map<String, Object> response = null;
+           response = generateRazorpay(savedAppointment.getId(), amount);
 
 
 
@@ -147,8 +148,15 @@ public class AppointmentService {
             if (generatedSignature.equals(signature)) {
                 System.out.println("hello");
                 // Signature is valid, process the payment and change status
-                if (changePaymentStatus(receipt)) {
+
+                 boolean paymentstatus=changePaymentStatus(receipt);
+                if (paymentstatus) {
+                    System.out.println("sucess of the payment");
                     return "success";
+                }else{
+                    System.out.println("simply failed");
+                    return "failed";
+
                 }
             } else {
                 // Signature is invalid
@@ -157,10 +165,10 @@ public class AppointmentService {
         } catch (Exception e) {
             return "Error verifying payment";
         }
-        return "Payment Successfull";
     }
 
     private boolean changePaymentStatus( String id) {
+        System.out.println("which id"+id);
 
 
 

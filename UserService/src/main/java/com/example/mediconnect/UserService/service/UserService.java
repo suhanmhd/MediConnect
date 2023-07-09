@@ -34,6 +34,8 @@ public class UserService {
     @Autowired
     private BookingConsumer bookingConsumer;
 
+    private final Object lock = new Object();
+
 
 
     public void saveUser(UserDetails userDetails) {
@@ -181,16 +183,6 @@ public class UserService {
                     }
                 }
 
-//                for(Appointment appointmentTime: appointments){
-//
-//                    LocalTime AppointmentTime =LocalTime.parse(appointmentTime.getTime(),inputFormatter);
-//
-//
-//                    if(AppointmentTime.isAfter(toTimeObj)&&AppointmentTime.isBefore(addedTime)){
-//                        return false;
-//                    }
-//                }
-
                 System.out.println("success");
                 return true;
 
@@ -205,9 +197,7 @@ public class UserService {
         }
         return false;
     }
-////
-//
-//}
+
 
     public  Map<String, Object> bookingAppoinment(AppointmentData appointmentData, String authorizationHeader) {
 
@@ -237,9 +227,31 @@ public class UserService {
 
            producer.bookingAppoinment(appointmentReq);
 
-    Map<String, Object> response= bookingConsumer.getReceivedBookingRes();
+
+
+
+
+    Map<String, Object> response=null;
+        response=bookingConsumer.getReceivedBookingRes();
+
+
+        synchronized (lock) {
+            while (response == null) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+//    while (response==null) {
+//
+//        response=bookingConsumer.getReceivedBookingRes();
+//    }
 
         System.out.println(userDetails);
+        System.out.println(":::"+response);
         System.out.println(name);
         return response;
     }

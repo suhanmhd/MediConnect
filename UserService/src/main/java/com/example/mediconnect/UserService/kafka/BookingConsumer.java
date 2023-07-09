@@ -38,30 +38,41 @@ public class BookingConsumer {
 
     @KafkaListener(topics = "appointment_send_booking_res_to_user_topic", groupId = "foo")
     public void bookingResponse(String message){
+        System.out.println("hellloworld");
+        System.out.println(message);
         Gson gsons = new Gson();
         TypeToken<Map<String, Object>> typeToken = new TypeToken<Map<String, Object>>() {};
       Map<String, Object> map = gsons.fromJson(message, typeToken.getType());
         System.out.println(map+"+++");
 
 
-
+        System.out.println("))))"+map);
 
         this.bookingResponse=map;
 
 
     }
     public Map<String, Object> getReceivedBookingRes() {
+        bookingResponse=null;
+        System.out.println("hl");
 
-        synchronized (lock) {
-            while (bookingResponse == null) {
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+//        synchronized (lock) {
+//            while (bookingResponse == null) {
+//                try {
+//                    lock.wait();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+
+        while (bookingResponse==null){
+            System.out.println("(((("+bookingResponse);
         }
+        System.out.println("(((("+bookingResponse);
         return bookingResponse;
+
+
     }
 
 

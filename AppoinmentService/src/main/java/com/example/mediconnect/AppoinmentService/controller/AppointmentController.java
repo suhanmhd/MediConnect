@@ -25,6 +25,8 @@ public class AppointmentController {
 
     @PostMapping("/verifyPayment")
     public ResponseEntity<Map<String,Object>> verifyPayment(@RequestBody Map<String, Object> requestBody) {
+        System.out.println("ppppp"+requestBody);
+
         String res=appointmentService.verifyPayment(requestBody);
         Map<String,Object>response =new HashMap<>();
         if(res=="success"){

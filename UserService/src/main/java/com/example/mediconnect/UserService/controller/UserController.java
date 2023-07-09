@@ -105,7 +105,8 @@ public class UserController {
     @PostMapping("/payment")
     public ResponseEntity<Map<String, Object>>bookingAppoinment(@RequestBody AppointmentData appointmentData, @RequestHeader("Authorization") String authorizationHeader) {
 
-  Map<String, Object> response= userService.bookingAppoinment(appointmentData,authorizationHeader);
+  Map<String, Object> response=null;
+          response=userService.bookingAppoinment(appointmentData,authorizationHeader);
         System.out.println(response+"________________________");
 
         return  new ResponseEntity<>(response,HttpStatus.OK);
