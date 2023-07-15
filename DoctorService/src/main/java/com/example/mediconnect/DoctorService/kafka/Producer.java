@@ -37,6 +37,9 @@ public class Producer {
     @Value("${doctor.get.all.appointment.topic}")
    private String getAppointmentRequestTopicName;
 
+    @Value("${doctor.get.today.appointments.topic}")
+    private  String getTodaysAppointmentTopicName;
+
 
 
     public void sendAllDoctors(List<Doctor> doctorResponse) {
@@ -153,5 +156,10 @@ public class Producer {
     public void getAppointmentRequest(UUID id) {
         String message= id.toString();
         kafkaTemplate.send(getAppointmentRequestTopicName, message);
+    }
+
+    public void getTodaysAppointments(UUID id) {
+        String message= id.toString();
+        kafkaTemplate.send(getTodaysAppointmentTopicName, message);
     }
 }

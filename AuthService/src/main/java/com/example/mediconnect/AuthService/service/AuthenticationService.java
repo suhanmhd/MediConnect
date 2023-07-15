@@ -63,6 +63,7 @@ public class AuthenticationService {
                     .email(doctorDetails.getEmail())
                       .password(doctorDetails.getPassword())
                       .isApproved(doctorDetails.getIsApproved())
+                       .enabled(true)
 
                       .role(Role.DOCTOR)
                        .build();
@@ -164,14 +165,14 @@ public class AuthenticationService {
     public void UnblockDoctorById(DoctorId doctorId) {
          UserCredential userdata =userRepository.findById(doctorId.getId())
                  .orElseThrow(() -> new IllegalArgumentException("User not found with ID: "));
-             userdata.setEnabled(false);
+             userdata.setEnabled(true);
              userRepository.save(userdata);
     }
 
     public void blockDoctorById(DoctorId doctorId) {
         UserCredential userdata =userRepository.findById(doctorId.getId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: "));
-        userdata.setEnabled(true);
+        userdata.setEnabled(false);
         userRepository.save(userdata);
 
     }
@@ -179,7 +180,7 @@ public class AuthenticationService {
     public void blockUserById(UserId userId) {
         UserCredential userdata =userRepository.findById(userId.getId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: "));
-        userdata.setEnabled(true);
+        userdata.setEnabled(false);
         userRepository.save(userdata);
 
     }
@@ -187,7 +188,7 @@ public class AuthenticationService {
     public void UnblockUserById(UserId userId) {
         UserCredential userdata =userRepository.findById(userId.getId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: "));
-        userdata.setEnabled(false);
+        userdata.setEnabled(true);
         userRepository.save(userdata);
 
     }

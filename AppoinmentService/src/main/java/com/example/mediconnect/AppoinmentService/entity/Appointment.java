@@ -22,7 +22,7 @@ public class Appointment extends BaseEntity {
 
      private String doctorId;
 
-     private String userInfo;
+   private String userInfo;
 
      private String doctorInfo;
 //    @Builder.Default

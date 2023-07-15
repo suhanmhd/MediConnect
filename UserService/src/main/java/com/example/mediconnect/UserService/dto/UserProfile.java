@@ -1,23 +1,16 @@
-package com.example.mediconnect.UserService.entity;
+package com.example.mediconnect.UserService.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.util.UUID;
-
 @Data
-@Entity
-@AllArgsConstructor
+@Builder
 @NoArgsConstructor
-public class UserDetails extends BaseEntity {
-
-
-     @Id
-     @Type(type = "org.hibernate.type.UUIDCharType")
+@AllArgsConstructor
+public class UserProfile {
     private UUID id;
     private String firstname;
 
@@ -29,17 +22,14 @@ public class UserDetails extends BaseEntity {
 
     private String name;
 
-    private String password;
+
 
     private  String gender;
 
 
     private  int age;
 
-    private boolean enabled;
-
     private String image;
-
 
 
 }

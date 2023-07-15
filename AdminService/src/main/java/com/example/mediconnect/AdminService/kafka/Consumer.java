@@ -1,5 +1,7 @@
 package com.example.mediconnect.AdminService.kafka;
 
+import com.example.mediconnect.AdminService.config.ResponseHolder;
+
 import com.example.mediconnect.AdminService.dto.Doctor;
 import com.example.mediconnect.AdminService.dto.Userdto;
 import com.example.mediconnect.AdminService.service.AdminService;
@@ -25,6 +27,10 @@ public class Consumer {
 
     private Userdto receivedBlockedUser;
     private List<Userdto> receivedUnBlockedUser;
+
+//     @Autowired
+//    private UserResponseHolder<List<Userdto>> responseHolder;
+
 
 
     @KafkaListener(topics = "send-all-doctors-topic", groupId = "foo")
@@ -53,6 +59,7 @@ public class Consumer {
 
     @KafkaListener(topics = "send_all_users_to_admin", groupId = "foo")
     public void getUsers(String message) {
+        System.out.println(message);
 
         ObjectMapper object = new ObjectMapper();
 
@@ -64,13 +71,32 @@ public class Consumer {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        this.receivedUsers = userList;
-    }
-    public List<Userdto> getReceivedUsers() {
-
-        return receivedUsers;
+//        adminService.setReceivedUsers(userList);
+        ResponseHolder.setResponse(userList);
+//        this.receivedUsers = userList;
     }
 
+
+
+//    @KafkaListener(topics ="send_all_users_to_admin", groupId = "foo")
+//    public void getUsers(String message) {
+//        ObjectMapper object = new ObjectMapper();
+//        Userdto[] users = null;
+//        List<Userdto> userList = null;
+//        try {
+//            users = object.readValue(message, Userdto[].class);
+//            userList = Arrays.asList(users);
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//        }
+//        ResponseHolder.setResponse(userList);
+////        responseHolder.setResponse(userList);
+//    }
+//    public List<Userdto> getReceivedUsers() {
+//
+//        return receivedUsers;
+//    }
+//
 
 
 
@@ -103,6 +129,8 @@ public class Consumer {
 
     @KafkaListener(topics = "send_all_doctor_by_blocked_id_topic", groupId = "foo")
     public void getBlockedDoctor(String message) {
+        System.out.println("message for"+message);
+
 
         ObjectMapper object = new ObjectMapper();
 
@@ -125,6 +153,7 @@ public class Consumer {
 
     @KafkaListener(topics = "send_all_doctor_by_unblocked_id_topic", groupId = "foo")
     public void getUnBlockedDoctor(String message) {
+        System.out.println("message for"+message);
 
         ObjectMapper object = new ObjectMapper();
 
@@ -155,6 +184,7 @@ public class Consumer {
 
     @KafkaListener(topics = "send_all_user_by_blocked_id_topic", groupId = "foo")
     public void getBlockedUser(String message) {
+        System.out.println("message for"+message);
 
         ObjectMapper object = new ObjectMapper();
 
@@ -166,13 +196,15 @@ public class Consumer {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        this.receivedBlockedUser =  userdto;
+//        ResponseHolder.setResponse(userdto);
+//        this.receivedBlockedUser =  userdto;
     }
 
-    public Userdto getReceivedBlockedUser() {
-
-        return receivedBlockedUser;
-    }
+//    public Userdto getReceivedBlockedUser() {
+//
+//
+//        return receivedBlockedUser;
+//    }
 
 
 

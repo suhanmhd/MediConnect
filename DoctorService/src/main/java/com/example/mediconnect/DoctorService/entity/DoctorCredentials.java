@@ -15,9 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DoctorCredentials extends BaseEntity{
-
-
-     @Id
+    @Id
      @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID id;
     private String firstname;
@@ -27,9 +25,7 @@ public class DoctorCredentials extends BaseEntity{
 
     private String email;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Column(columnDefinition = "text")
-    private List<String> timings;
+
 
     private String name;
 
@@ -38,17 +34,18 @@ public class DoctorCredentials extends BaseEntity{
     private boolean enabled;
 
     private String isApproved;
-
-//    private String timings;
-
-
-
-
     private String specialization;
 
     private String experience;
 
     private long feesPerConsultation;
 
+    private String image;
+
     private  String license;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "doctor")
+    private List<AvailableSlot> availableSlots;
+
+
 }

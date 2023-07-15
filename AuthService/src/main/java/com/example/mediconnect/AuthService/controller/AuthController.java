@@ -86,6 +86,7 @@ public class AuthController {
 //    }
 @PostMapping("/admin/login")
 public ResponseEntity<Map<String, Object>> adminLogin(@RequestBody AuthRequest authRequest) {
+    System.out.println(authRequest);
     UserCredential user = userCredentialRepository.findByName(authRequest.getUsername())
             .orElseThrow(() -> new NoSuchElementException("User not found"));
 
@@ -98,6 +99,7 @@ public ResponseEntity<Map<String, Object>> adminLogin(@RequestBody AuthRequest a
 
 
     if (user.getRole()!= Role.ADMIN) {
+        System.out.println("helo");
 
 
         throw new InvalidLoginException("Invalid users");
@@ -107,6 +109,7 @@ public ResponseEntity<Map<String, Object>> adminLogin(@RequestBody AuthRequest a
     String token = null;
     Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
     if (authenticate.isAuthenticated()) {
+        System.out.println(authenticate.isAuthenticated()+"success");
         token = authenticationService.generateToken(authRequest.getUsername(), user.getRole().toString());
         System.out.println(token);
         UserResponse userResponse = new UserResponse();
@@ -121,6 +124,7 @@ public ResponseEntity<Map<String, Object>> adminLogin(@RequestBody AuthRequest a
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
     } else {
+        System.out.println("sss");
 
         throw new InvalidLoginException("invalid user");
     }
@@ -142,8 +146,8 @@ public ResponseEntity<Map<String, Object>> adminLogin(@RequestBody AuthRequest a
             throw new InvalidLoginException("Invalid user");
         }
 
-        if (user.isEnabled()) {
-            throw new InvalidLoginException("User is blocked");
+        if (!user.isEnabled()) {
+            throw new InvalidLoginException("Your Account is Blocked");
         }
         if (user.getIsApproved().equals("pending")) {
 
@@ -194,9 +198,9 @@ public ResponseEntity<Map<String, Object>> adminLogin(@RequestBody AuthRequest a
             throw new InvalidLoginException("Invalid user");
         }
 
-//        if (user.isEnabled()) {
-//            throw new InvalidLoginException("User is blocked");
-//        }
+        if (!user.isEnabled()) {
+            throw new InvalidLoginException("User is blocked");
+        }
 
 
         if (user.getRole()!= Role.USER) {

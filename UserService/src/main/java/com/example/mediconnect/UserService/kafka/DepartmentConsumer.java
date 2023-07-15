@@ -46,6 +46,7 @@ public class DepartmentConsumer {
     }
 
     public List<DepartmentResponse>getRecievedDepartmentResponse(){
+
         return recievedDepartmentResponse;
     }
 

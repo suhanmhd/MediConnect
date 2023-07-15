@@ -122,7 +122,7 @@ public class Producer {
                     JsonProcessingException e) {
                 e.printStackTrace();
             }
-            System.out.println(message);
+            System.out.println("message blocked user"+message);
             kafkaTemplate.send(UserBlocktopicName, message);
 
 

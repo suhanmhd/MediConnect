@@ -42,5 +42,7 @@ public class Doctor {
 
     private long feesPerConsultation;
 
+    private String image;
+
     private  String license;
 }

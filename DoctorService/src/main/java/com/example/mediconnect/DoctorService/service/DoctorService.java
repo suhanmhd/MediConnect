@@ -1,9 +1,7 @@
 package com.example.mediconnect.DoctorService.service;
 
-import com.example.mediconnect.DoctorService.dto.Appointment;
-import com.example.mediconnect.DoctorService.dto.ApproveRequest;
-import com.example.mediconnect.DoctorService.dto.Doctor;
-import com.example.mediconnect.DoctorService.dto.DoctorId;
+import com.example.mediconnect.DoctorService.dto.*;
+import com.example.mediconnect.DoctorService.entity.AvailableSlot;
 import com.example.mediconnect.DoctorService.entity.DoctorCredentials;
 import com.example.mediconnect.DoctorService.kafka.AppointmentConsumer;
 import com.example.mediconnect.DoctorService.kafka.Consumer;
@@ -13,10 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.springframework.beans.BeanUtils.copyProperties;
 
@@ -111,7 +108,7 @@ public class DoctorService {
         copyProperties(doctor,doctors);
 
        producer.sendDoctorById( doctors);
-        System.out.println(doctor+"sssssssssssssssssssssssssssssss");
+
     }
 
     public void blockDoctorById(DoctorId doctorId) {
@@ -119,7 +116,7 @@ public class DoctorService {
 
        DoctorCredentials  doctor=doctorRepository.getById(doctorId.getId());
 
-        doctor.setEnabled(true);
+        doctor.setEnabled(false);
         doctorRepository.save(doctor);
         DoctorCredentials doctors=doctorRepository.getById(doctorId.getId());
 //        System.out.println(doctor);
@@ -133,7 +130,7 @@ public class DoctorService {
         DoctorCredentials  doctor=doctorRepository.getById(doctorId.getId());
 
 
-        doctor.setEnabled(false);
+        doctor.setEnabled(true);
         doctorRepository.save(doctor);
         DoctorCredentials doctors=doctorRepository.getById(doctorId.getId());
 //        System.out.println(doctor);
@@ -156,8 +153,11 @@ public class DoctorService {
 
         doctorCredentials.setExperience(doctor.getExperience());
         doctorCredentials.setFeesPerConsultation(doctor.getFeesPerConsultation());
-        doctorCredentials.setTimings(doctor.getTimings());
+        doctorCredentials.setImage(doctor.getImage());
+
+//        doctorCredentials.setTimings(doctor.getTimings());
         doctorRepository.save(doctorCredentials);
+
 
         Doctor updatedDoctor = new Doctor();
         copyProperties(doctorCredentials,updatedDoctor);
@@ -168,7 +168,61 @@ public class DoctorService {
 
     public List<Appointment> getAppointmentRequest(UUID id) {
         producer.getAppointmentRequest(id);
-        List<Appointment> appointmentList=appointmentConsumer.getAllAppointmetsToDoctor();
+        List<Appointment> appointmentList=null;
+        while (appointmentList==null) {
+            appointmentList=appointmentConsumer.getAllAppointmetsToDoctor();
+        }
         return appointmentList;
+    }
+
+    public List<Appointment> getTodaysAppointments(UUID id) {
+        producer.getTodaysAppointments(id);
+
+        List<Appointment> appointmentList =null;
+        while (appointmentList==null) {
+            appointmentList = appointmentConsumer.getTodaysAppointmentsToDoctor();
+        }
+         return  appointmentList;
+    }
+
+    public void updateBookingSlot(DoctorSlotDto doctorSlotDto) {
+
+        Optional<DoctorCredentials> optionalDoctor = doctorRepository.findById(doctorSlotDto.getId());
+        if (optionalDoctor.isPresent()) {
+            DoctorCredentials doctor = optionalDoctor.get();
+            List<AvailableSlotDTO> availableSlots = doctorSlotDto.getAvailableSlots();
+
+            // Create AvailableSlot entities and set the data
+            for (AvailableSlotDTO slotDTO : availableSlots) {
+                AvailableSlot slot = new AvailableSlot();
+                slot.setDate(slotDTO.getDate());
+                slot.setTimes(slotDTO.getTimes());
+                slot.setDoctor(doctor);
+
+                doctor.getAvailableSlots().add(slot);
+            }
+
+            doctorRepository.save(doctor);
+
+        }
+    }
+
+    public List<String> getTimeSlotsByDate(DoctorSlotDto doctorSlotDto, LocalDate date) {
+        Optional<DoctorCredentials> optionalDoctor = doctorRepository.findById(doctorSlotDto.getId());
+        if (optionalDoctor.isPresent()) {
+            DoctorCredentials doctor = optionalDoctor.get();
+
+            // Filter available slots based on the provided date
+            List<String> timeSlots = doctor.getAvailableSlots().stream()
+                    .filter(slot -> slot.getDate().equals(date))
+                    .flatMap(slot -> slot.getTimes().stream())
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            return timeSlots;
+        } else {
+
+            return Collections.emptyList();
+        }
     }
 }

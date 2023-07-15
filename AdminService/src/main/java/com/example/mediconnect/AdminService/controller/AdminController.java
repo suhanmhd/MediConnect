@@ -71,18 +71,22 @@ public ResponseEntity<String>addDepartment(@RequestBody Department department){
 
     @GetMapping("/doctors")
     public ResponseEntity<Map<String, List>> getAllDoctors(){
+        System.out.println("doc req send");
         List<Doctor> responseDoctors=adminService.getAllDoctors();
         Map<String, List> response = new HashMap<>();
         response.put("doctorDetails",responseDoctors);
+        System.out.println("----"+response);
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
 
 
     @GetMapping("/users")
     public ResponseEntity<Map<String, List>>getAllUsers(){
+        System.out.println("user req send");
         List<Userdto> responseUsers=adminService.getAllUsers();
         Map<String, List> response = new HashMap<>();
         response.put("userDetails",responseUsers);
+        System.out.println("++++"+response);
         return  new ResponseEntity<>(response,HttpStatus.CREATED);
     }
 
@@ -132,24 +136,26 @@ public ResponseEntity<Map<String, Doctor>> blockDoctor(@PathVariable("id") UUID 
 
 
     @GetMapping("/blockUser/{userId}")
-    public ResponseEntity<Map<String,Userdto>> blockUser(@PathVariable("userId") UUID id){
+    public ResponseEntity<Map<String,Object>> blockUser(@PathVariable("userId") UUID id){
 
     Userdto user=adminService.blockUser(id);
         System.out.println(id);
-        Map<String,Userdto> response = new HashMap<>();
+        Map<String,Object> response = new HashMap<>();
         response.put("userDetails",user);
-        System.out.println(response);
+        response.put("status","ok");
+        System.out.println(">>>>>>>>>>>>>>>>"+response);
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
 
 
     @GetMapping("/unblockUser/{userId}")
-    public ResponseEntity<Map<String,List>> unBlockUser(@PathVariable("userId") UUID id){
+    public ResponseEntity<Map<String,Object>> unBlockUser(@PathVariable("userId") UUID id){
 
         List<Userdto> user=adminService.UnBlockUser(id);
         System.out.println(id);
-        Map<String,List> response = new HashMap<>();
+        Map<String,Object> response = new HashMap<>();
         response.put("userDetails",user);
+        response.put("status","ok");
         System.out.println(response);
 
         return  new ResponseEntity<>(response,HttpStatus.OK);

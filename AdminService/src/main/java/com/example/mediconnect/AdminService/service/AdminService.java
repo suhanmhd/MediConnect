@@ -1,5 +1,7 @@
 package com.example.mediconnect.AdminService.service;
 
+import com.example.mediconnect.AdminService.config.ResponseHolder;
+
 import com.example.mediconnect.AdminService.dto.*;
 import com.example.mediconnect.AdminService.entity.Department;
 import com.example.mediconnect.AdminService.kafka.Consumer;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.beans.BeanUtils.copyProperties;
 
@@ -22,6 +25,7 @@ public class AdminService {
     private final DepartmentRepository departmentRepository;
     private final Producer producer;
     private final Consumer consumer;
+
 
     @Autowired
     public AdminService(DepartmentRepository departmentRepository, Producer producer, Consumer consumer) {
@@ -112,7 +116,7 @@ public class AdminService {
         }
 
 
-        System.out.println("________blocked__________");
+        System.out.println("________blocked__________"+doctor);
          return doctor;
     }
 
@@ -135,31 +139,54 @@ public class AdminService {
     }
 
     public List<Userdto> getAllUsers() {
+        CompletableFuture<List<Userdto>> future = new CompletableFuture<>();
+
+        ResponseHolder.setCompletableFuture(future);
+
         producer.getAllUsers();
 
-        List<Userdto> getResponseUsers=null;
-        while (getResponseUsers==null){
-                getResponseUsers=consumer.getReceivedUsers();
+        try {
+            return future.get(); // Wait for the response
+        } catch (Exception e) {
+            // Handle exceptions
+            return null;
         }
 
-        return  getResponseUsers;
-
     }
+
+//    public void setReceivedUsers(List<Userdto> userList) {
+//        future.complete(userList); // Set the future result
+//    }
 
     public Userdto blockUser(UUID id) {
 
       UserId userId = new UserId();
        userId.setId(id);
+        CompletableFuture<Userdto> future = new CompletableFuture<>();
+//        ResponseHolder.setCompletableFuture(future);
+
+
+        //KAFKA PRODUCER TO SEND USER ID TO THE USER SERVICE
         producer.sendBlockUser(userId);
 
-      Userdto user = null;
-        while (user == null) {
-          user= consumer.getReceivedBlockedUser();
+
+        try {
+            return future.get(); // Wait for the response
+        } catch (Exception e) {
+            // Handle exceptions
+            return null;
         }
 
 
-        System.out.println("________blocked__________");
-        return user;
+        //KAFKA CONSUMER TO RECIEVE RES FROM  USER SERVICE TO ADMIN
+//      Userdto user = null;
+//
+//        while (user == null) {
+//
+//          user= consumer.getReceivedBlockedUser();
+//
+//        }
+//        return user;
 
 
     }
@@ -173,7 +200,7 @@ public class AdminService {
 //        while (user == null) {
 //            user= consumer.getReceivedUnBlockedUser();
 //        }
-        List<Userdto> getResponseUsers=  consumer.getReceivedUnBlockedUser();
+        List<Userdto> getResponseUsers= consumer.getReceivedUnBlockedUser();
 
         return getResponseUsers;
     }

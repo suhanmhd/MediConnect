@@ -26,18 +26,18 @@ public class Consumer {
 
 
 
-//    @KafkaListener(topics ="user-details-data-topic", groupId = "foo")
-//    public void doctorDetails(String message) {
-//
-//        ObjectMapper object = new ObjectMapper();
-//        UserDetails userDetails = null;
-//        try {
-//           userDetails = object.readValue(message, UserDetails.class);
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//        }
-//        userService.saveUser(userDetails);
-//    }
+    @KafkaListener(topics ="user-details-data-topic", groupId = "foo")
+    public void userDetails(String message) {
+
+        ObjectMapper object = new ObjectMapper();
+        UserDetails userDetails = null;
+        try {
+           userDetails = object.readValue(message, UserDetails.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        userService.saveUser(userDetails);
+    }
 
 
 

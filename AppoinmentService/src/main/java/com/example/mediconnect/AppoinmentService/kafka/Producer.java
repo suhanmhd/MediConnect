@@ -31,6 +31,8 @@ public class Producer {
 
     @Value("${send.appointment.times.of.doctor}")
     private String appointmentsTimesofToDoctorTopicName;
+    @Value("${send.todays.appointments.to.doctor}")
+    private String todaysAppointmentsToDoctorTopicName;
 
 
     @Autowired
@@ -102,6 +104,22 @@ public class Producer {
         }
         System.out.println(message);
         kafkaTemplate.send(appointmentsTimesofToDoctorTopicName, message);
+
+    }
+
+    public void getTodaysAppointments(List<Appointment> todaysAppointments) {
+        ObjectMapper om = new ObjectMapper();
+
+
+        String message = null;
+        try {
+            message = om.writeValueAsString(todaysAppointments);
+        } catch (
+                JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        System.out.println(message);
+        kafkaTemplate.send(todaysAppointmentsToDoctorTopicName, message);
 
     }
 }

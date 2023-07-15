@@ -64,6 +64,13 @@ public class Consumer {
     }
 
 
+    @KafkaListener(topics = "get_todays_appointment_requests_to_doctor_topic", groupId = "foo")
+    public void getTodaysAppointments(String docId) {
+
+        appointmentService.getTodaysAppointment(docId);
+    }
+
+
     @KafkaListener(topics = "send_get_appointment_time_topic", groupId = "foo")
     public void getAppointmentTimes(String docId) {
 

@@ -2,12 +2,15 @@ package com.example.mediconnect.DoctorService.controller;
 
 import com.example.mediconnect.DoctorService.dto.Appointment;
 import com.example.mediconnect.DoctorService.dto.Doctor;
+import com.example.mediconnect.DoctorService.dto.DoctorSlotDto;
 import com.example.mediconnect.DoctorService.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +41,25 @@ public class DoctorController {
     }
 
 
+    @PostMapping("/updateBookingSlot")
+        public ResponseEntity<Map<String,DoctorSlotDto>>updateBookingSlot(@RequestBody DoctorSlotDto doctorSlotDto){
+        doctorService.updateBookingSlot(doctorSlotDto);
+        System.out.println("hello world");
+        System.out.println(doctorSlotDto);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/doctors/{doctorId}/time-slots")
+    public ResponseEntity<List<String>> getTimeSlotsByDate(@PathVariable UUID doctorId,
+                                                           @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        DoctorSlotDto doctorSlotDto = new DoctorSlotDto();
+        doctorSlotDto.setId(doctorId);
+
+        List<String> timeSlots = doctorService.getTimeSlotsByDate(doctorSlotDto, date);
+        return ResponseEntity.ok(timeSlots);
+    }
+
+
 
     @PostMapping("/updateDoctorProfile")
     public ResponseEntity<Map<String,Doctor>> updateDoctor(@RequestBody Doctor doctor) {
@@ -58,8 +80,25 @@ public class DoctorController {
     public ResponseEntity<Map<String,List>>getAppointmentRequest(@PathVariable("docId") UUID id){
         Map<String,List> response = new HashMap<>();
         List<Appointment> appointmentList=doctorService.getAppointmentRequest(id);
+        System.out.println(appointmentList);
         response.put("appointmentsDetails",appointmentList);
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
+
+
+    @GetMapping("/getTodaysAppointmentRequests/{docId}")
+    public ResponseEntity<Map<String,List>>getTodaysAppointments(@PathVariable("docId") UUID id){
+        Map<String,List> response = new HashMap<>();
+
+        List<Appointment> appointmentList=null;
+        while (appointmentList==null) {
+          appointmentList=doctorService.getTodaysAppointments(id);
+        }
+
+        response.put("appointmentsDetails",appointmentList);
+        return  new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+
 
 }

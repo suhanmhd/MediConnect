@@ -132,6 +132,24 @@ public class UserController {
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
 
+    @GetMapping("/getUserProfile/{userId}")
+    public ResponseEntity<Map<String,UserProfile>>getUserProfile(@PathVariable("userId") UUID id){
+
+        UserProfile userProfile=userService.getUserProfile(id);
+        Map<String,UserProfile>response = new HashMap<>();
+        response.put("userProfile",userProfile);
+        System.out.println(userProfile);
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+
+
+    @PostMapping("/updateUserProfile")
+    public ResponseEntity<UserProfile> updateUser(@RequestBody UserProfile request) {
+        UserProfile userProfile = userService.updateUserProfile(request);
+        return  new ResponseEntity<>(userProfile,HttpStatus.OK);
+    }
+
 
 
 }

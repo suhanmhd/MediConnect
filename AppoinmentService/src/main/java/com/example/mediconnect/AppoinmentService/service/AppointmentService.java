@@ -29,7 +29,10 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
@@ -224,8 +227,12 @@ public class AppointmentService {
          Appointment appointmentdetails = appointmentRepository.findById(appointmentCanceldto.getAppointmentId()).orElse(null);
         System.out.println(appointmentdetails.getPaymentStatus()+""+appointmentdetails.getStatus()+"+++++"+appointmentdetails.getId());
         if (appointmentdetails != null && "pending".equals(appointmentdetails.getStatus()) && "Completed".equals(appointmentdetails.getPaymentStatus())){
+
+
          appointmentRepository.delete(appointmentdetails);
+
              producer.cancelAppointmentRes();
+
         }
 
     }
@@ -252,9 +259,30 @@ public class AppointmentService {
 
     }
 
+
+    public void getTodaysAppointment(String doctorId) {
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        System.out.println(today);
+        List<Appointment> appointmentRequest = appointmentRepository.findAllByDoctorId(doctorId);
+
+
+        List<Appointment> todaysAppointments =appointmentRequest.stream()
+                .filter(appointment -> {
+                    LocalDate appointmentDate = LocalDate.parse(appointment.getDate(), formatter);
+                    System.out.println(appointmentDate);
+                    return  appointmentDate.equals(today);
+                })
+                .collect(Collectors.toList());
+        producer.getTodaysAppointments(todaysAppointments);
+    }
+
     public void getAppointmentTimes(String doctorId) {
         List<Appointment> appointmentTimes = appointmentRepository.findAllByDoctorId(doctorId);
 
         producer.getAppointmentTime(appointmentTimes);
     }
+
+
 }

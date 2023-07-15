@@ -14,12 +14,12 @@ public class RouteValidator {
             "/auth/register",
             "/auth/token",
             "/eureka",
-            "/admin/departments",
-            "/user/getdepartments",
-            "/user/getDoctorByCategory/{departmentName}",
-            "/user/getDoctorByCategory",
-            "/getSingleDoctor/{docId}",
-            "/getSingleDoctor"
+//            "/admin/departments",
+            "/user/getdepartments"
+//            "/user/getDoctorByCategory/{departmentName}",
+//            "/user/getDoctorByCategory",
+//            "/getSingleDoctor/{docId}",
+//            "/getSingleDoctor"
     );
     public static final List<String> securedRoutes = List.of(
             "/admin/add/department",

@@ -99,6 +99,7 @@ public class BookingConsumer {
 
     public List<Appointment> getAllReceivedAppointmets() {
 
+
         synchronized (lock) {
             while (viewAppointments == null) {
                 try {
@@ -124,6 +125,7 @@ public class BookingConsumer {
 
 
     public String getCancelAppointemntRes(){
+
       synchronized (lock) {
           while (cancelAppointemnt == null) {
             try {
@@ -163,6 +165,7 @@ public class BookingConsumer {
     }
 
     public List<Appointment> getAllReceivedAppointmetTimes() {
+
 
         synchronized (lock) {
             while (viewAppointmentTimes == null) {

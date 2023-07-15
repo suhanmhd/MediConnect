@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -39,14 +40,18 @@ public class UserService {
 
 
     public void saveUser(UserDetails userDetails) {
+        System.out.println(userDetails);
         userDetailsRepository.save(userDetails);
     }
 
     public List<DepartmentResponse> getAllDepartments() {
 
-        producer.getAllDepartments();
+             producer.getAllDepartments();
 
-             List<DepartmentResponse> departmentResponses = departmentConsumer.getRecievedDepartmentResponse();
+             List<DepartmentResponse> departmentResponses=null;
+             while(departmentResponses==null) {
+                 departmentResponses = departmentConsumer.getRecievedDepartmentResponse();
+             }
 
         return departmentResponses;
     }
@@ -54,7 +59,10 @@ public class UserService {
     public List<Doctor> getDoctorByDepartment(String departmentName) {
         producer.getDoctorByDepartment(departmentName);
 
-        List<Doctor> doctorList= departmentConsumer.getReceivedDoctors();
+        List<Doctor> doctorList=null;
+               while (doctorList==null) {
+                   doctorList=departmentConsumer.getReceivedDoctors();
+               }
 
          return doctorList;
     }
@@ -66,7 +74,11 @@ public class UserService {
 
 
         producer.getDoctorById(doctorId);
-       return departmentConsumer.getReceivedDoctor();
+        Doctor doctor=null;
+        while (doctor==null) {
+            doctor= departmentConsumer.getReceivedDoctor();
+        }
+        return doctor;
     }
 
     public void getAllUsers() {
@@ -89,13 +101,14 @@ public class UserService {
        UserDetails  user=userDetailsRepository.getById(userId.getId());
 
 
-         user.setEnabled(true);
+         user.setEnabled(false);
         userDetailsRepository.save(user);
        UserDetails userDetails=userDetailsRepository.getById(userId.getId());
+        System.out.println(userId);
 
               Userdto userdto = new Userdto();
         copyProperties(userDetails,userdto);
-        System.out.println(userdto+"=++++++++++++++++++++++++++++++++++");
+        System.out.println("____"+userdto);
 
         producer.sendblockUserRes(userdto);
     }
@@ -104,7 +117,7 @@ public class UserService {
         UserDetails  user=userDetailsRepository.getById(userId.getId());
 
 
-        user.setEnabled(false);
+        user.setEnabled(true);
         userDetailsRepository.save(user);
        List<UserDetails> userDetails=userDetailsRepository.findAll();
         List<Userdto>userResponse = new ArrayList<>();
@@ -123,17 +136,21 @@ public class UserService {
 
     public boolean checkAvailability(AppointmentData appointmentData) {
 
-//        try {
+
         String date = appointmentData.getDate();
         String fromTime = appointmentData.getTime();
-        System.out.println(appointmentData);
-        System.out.println(date);
-        System.out.println(fromTime);
+
+
+
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        LocalDate selectedDate = LocalDate.parse(date, dateFormatter);
 
         DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("h:mm a");
         LocalTime toTimeObj = LocalTime.parse(fromTime, inputFormatter);
 
-        // Add 15 minutes to the time
+
         LocalTime addedTime = toTimeObj.plusMinutes(16);
 
         // Format the added time as "h:mm a"
@@ -145,7 +162,7 @@ public class UserService {
 
 
 
-//        UUID docId = UUID.fromString(appointmentData.getDocId());
+
         Doctor doctor = getDoctorById(appointmentData.getDocId());
         System.out.println(doctor);
 
@@ -160,10 +177,10 @@ public class UserService {
                 appointments.add(appointmentlist);
             }
         }
-        System.out.println("++"+appointments);
+        if (selectedDate.isBefore(today)) {
+            return false;
+        }
 
-
-        System.out.println(doctor + "ddddddddddddddddddddddddddddddddddddddddd");
         if (doctor != null && doctor.getTimings().size() >= 2) {
             LocalTime doctorStartTime = LocalTime.parse(doctor.getTimings().get(0), inputFormatter);
             LocalTime doctorEndTime = LocalTime.parse(doctor.getTimings().get(1), inputFormatter);
@@ -175,7 +192,7 @@ public class UserService {
                     LocalTime AppointmentTime =LocalTime.parse(appointmentTime.getTime(),inputFormatter);
                     LocalTime appointmentTimePlus15 = AppointmentTime.plusMinutes(15);
 
-                    if(toTimeObj.isAfter(AppointmentTime)|| toTimeObj.equals(AppointmentTime)&&toTimeObj.isBefore(appointmentTimePlus15)||toTimeObj.equals(AppointmentTime)){
+                    if(toTimeObj.isAfter(AppointmentTime)&&toTimeObj.isBefore(appointmentTimePlus15)){
                         return false;
                     }
                     if(AppointmentTime.isAfter(toTimeObj)&&AppointmentTime.isBefore(addedTime)){
@@ -244,11 +261,8 @@ public class UserService {
                 }
             }
         }
-        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-//    while (response==null) {
-//
-//        response=bookingConsumer.getReceivedBookingRes();
-//    }
+
+
 
         System.out.println(userDetails);
         System.out.println(":::"+response);
@@ -266,6 +280,31 @@ public class UserService {
     public String cancelAppointemnt(AppointmentCanceldto appointmentCanceldto) {
          producer.cancelAppointemnt(appointmentCanceldto);
          return bookingConsumer.getCancelAppointemntRes();
+
+    }
+
+    public UserProfile getUserProfile(UUID id) {
+
+        UserDetails user=userDetailsRepository.findById(id).orElse(null);
+         UserProfile userProfile = new UserProfile();
+         copyProperties(user,userProfile);
+         return userProfile;
+
+    }
+
+
+    public UserProfile updateUserProfile(UserProfile userProfile) {
+        UserDetails user = userDetailsRepository.findById(userProfile.getId()).orElseThrow( null);
+
+//        UserDetails user = userDetailsRepository.getById(userProfile.getId());
+        user.setAge(userProfile.getAge());
+        user.setGender(userProfile.getGender());
+        user.setImage(userProfile.getImage());
+        userDetailsRepository.save(user);
+        UserProfile updatedUser = new UserProfile();
+        copyProperties(user,updatedUser);
+        return updatedUser;
+
 
     }
 }
