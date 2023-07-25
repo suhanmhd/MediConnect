@@ -118,7 +118,7 @@ public class ChatController {
     @MessageMapping("/message")
     @SendTo("/group/public")
     public MessageRequest sendMessage(@Payload MessageRequest message) {
-        System.out.println("hekk");
+        System.out.println("abcd");
         System.out.println(message);
 
 
