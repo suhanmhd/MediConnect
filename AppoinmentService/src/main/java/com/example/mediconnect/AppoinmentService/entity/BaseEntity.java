@@ -48,11 +48,11 @@ import java.util.UUID;
 @MappedSuperclass
 public class BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Type(type = "org.hibernate.type.UUIDCharType")
-    private UUID id;
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.AUTO, generator = "uuid2")
+//    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+//    @Type(type = "org.hibernate.type.UUIDCharType")
+//    private UUID id;
 
     @CreationTimestamp
     @Column(updatable = false)

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class Consumer {
@@ -28,8 +29,7 @@ public class Consumer {
     private Userdto receivedBlockedUser;
     private List<Userdto> receivedUnBlockedUser;
 
-//     @Autowired
-//    private UserResponseHolder<List<Userdto>> responseHolder;
+
 
 
 
@@ -46,12 +46,13 @@ public class Consumer {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+
         this.receivedDoctors = doctorList;
     }
 
     public List<Doctor> getReceivedDoctors() {
 
-        return receivedDoctors;
+        return  receivedDoctors;
     }
 
 
@@ -71,32 +72,15 @@ public class Consumer {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-//        adminService.setReceivedUsers(userList);
-        ResponseHolder.setResponse(userList);
-//        this.receivedUsers = userList;
+        this.receivedUsers=userList;
+
+    }
+
+    public List<Userdto> getReceivedUsers() {
+        return receivedUsers;
     }
 
 
-
-//    @KafkaListener(topics ="send_all_users_to_admin", groupId = "foo")
-//    public void getUsers(String message) {
-//        ObjectMapper object = new ObjectMapper();
-//        Userdto[] users = null;
-//        List<Userdto> userList = null;
-//        try {
-//            users = object.readValue(message, Userdto[].class);
-//            userList = Arrays.asList(users);
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//        }
-//        ResponseHolder.setResponse(userList);
-////        responseHolder.setResponse(userList);
-//    }
-//    public List<Userdto> getReceivedUsers() {
-//
-//        return receivedUsers;
-//    }
-//
 
 
 
@@ -196,15 +180,15 @@ public class Consumer {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-//        ResponseHolder.setResponse(userdto);
-//        this.receivedBlockedUser =  userdto;
+
+        this.receivedBlockedUser =  userdto;
     }
 
-//    public Userdto getReceivedBlockedUser() {
-//
-//
-//        return receivedBlockedUser;
-//    }
+    public Userdto getReceivedBlockedUser() {
+
+
+        return receivedBlockedUser;
+    }
 
 
 

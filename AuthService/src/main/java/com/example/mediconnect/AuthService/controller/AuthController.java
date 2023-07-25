@@ -330,7 +330,7 @@ public ResponseEntity<Map<String, Object>> adminLogin(@RequestBody AuthRequest a
 
     @PostMapping("/verifyotp/{id}")
     public ResponseEntity<Map<String, Boolean>> verifyAccount(@PathVariable("id") UUID id,@RequestBody OtpDto otpDto) {
-        System.out.println("dalkfl");
+
         boolean res=authenticationService.verifyAccount(id, otpDto);
         Map<String, Boolean> response = new HashMap<>();
 

@@ -3,6 +3,7 @@ package com.example.mediconnect.AppoinmentService.service;
 import com.example.mediconnect.AppoinmentService.dto.AppointmentCanceldto;
 import com.example.mediconnect.AppoinmentService.dto.AppointmentReq;
 import com.example.mediconnect.AppoinmentService.dto.AppointmentStatus;
+import com.example.mediconnect.AppoinmentService.dto.DoctorInfo;
 import com.example.mediconnect.AppoinmentService.entity.Appointment;
 import com.example.mediconnect.AppoinmentService.kafka.Producer;
 import com.example.mediconnect.AppoinmentService.repository.AppointmentRepository;
@@ -285,4 +286,23 @@ public class AppointmentService {
     }
 
 
+public List<DoctorInfo> getBookedDoctors(UUID id) {
+    List<Appointment> appointments = appointmentRepository.findAllByUserId(id.toString());
+    List<DoctorInfo> doctorInfos = appointments.stream()
+            .map(appointment -> DoctorInfo.builder()
+                    .doctorId(appointment.getDoctorId())
+                    .doctorInfo(appointment.getDoctorInfo())
+                    .build())
+            .collect(Collectors.toList());
+    return doctorInfos;
+}
+
+    public DoctorInfo getDoctor(UUID id) {
+        Appointment appointments = appointmentRepository.findDoctorById(id.toString());
+        DoctorInfo doctorInfo =new DoctorInfo();
+        doctorInfo.setDoctorId(appointments.getDoctorId());
+        doctorInfo.setDoctorInfo(appointments.getDoctorInfo());
+
+        return doctorInfo;
+    }
 }

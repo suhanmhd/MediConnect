@@ -40,6 +40,8 @@ public class Doctor {
 
     private String experience;
 
+    private String image;
+
     private long feesPerConsultation;
 
     private  String license;

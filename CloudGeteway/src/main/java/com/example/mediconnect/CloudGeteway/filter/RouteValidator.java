@@ -14,8 +14,11 @@ public class RouteValidator {
             "/auth/register",
             "/auth/token",
             "/eureka",
-//            "/admin/departments",
-            "/user/getdepartments"
+
+            "/user/getdepartments",
+            "/user/getUserProfile",
+            "/doctor/getDoctorProfile"
+
 //            "/user/getDoctorByCategory/{departmentName}",
 //            "/user/getDoctorByCategory",
 //            "/getSingleDoctor/{docId}",

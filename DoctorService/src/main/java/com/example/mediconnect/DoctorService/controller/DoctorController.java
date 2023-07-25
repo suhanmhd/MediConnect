@@ -29,7 +29,7 @@ public class DoctorController {
     }
 
     @GetMapping("/getDoctorProfile/{docId}")
-    public ResponseEntity<Map<String,Doctor>> GetDoctorById(@PathVariable("docId") UUID id){
+    public ResponseEntity<Map<String,Doctor>>GetDoctorById(@PathVariable("docId") UUID id){
 
         Doctor doctor = doctorService. GetDoctorById(id);
 
@@ -41,19 +41,26 @@ public class DoctorController {
     }
 
 
-    @PostMapping("/updateBookingSlot")
+    @PostMapping("/addBookingSlot")
         public ResponseEntity<Map<String,DoctorSlotDto>>updateBookingSlot(@RequestBody DoctorSlotDto doctorSlotDto){
+        System.out.println(doctorSlotDto);
         doctorService.updateBookingSlot(doctorSlotDto);
         System.out.println("hello world");
         System.out.println(doctorSlotDto);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+//    @PostMapping("/addBookingSlot")
+//    public ResponseEntity<Map<String,Object>>updateBookingSlot(@RequestBody Map<String,Object> res){
+//        System.out.println(res);
+//
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
     @GetMapping("/doctors/{doctorId}/time-slots")
     public ResponseEntity<List<String>> getTimeSlotsByDate(@PathVariable UUID doctorId,
                                                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         DoctorSlotDto doctorSlotDto = new DoctorSlotDto();
-        doctorSlotDto.setId(doctorId);
+        doctorSlotDto.setDoctor_id(doctorId);
 
         List<String> timeSlots = doctorService.getTimeSlotsByDate(doctorSlotDto, date);
         return ResponseEntity.ok(timeSlots);
@@ -96,6 +103,24 @@ public class DoctorController {
         }
 
         response.put("appointmentsDetails",appointmentList);
+        return  new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+
+
+
+
+    @GetMapping("/getDoctor/{docId}")
+    public ResponseEntity<Map<String,Doctor>>getDoctorById(@PathVariable("docId") String docId){
+
+        UUID id = UUID.fromString(docId);
+
+        Doctor doctor = doctorService. GetDoctorById(id);
+
+
+        Map<String,Doctor> response = new HashMap<>();
+        response.put("doctorProfile",doctor);
+        System.out.println(response);
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
 

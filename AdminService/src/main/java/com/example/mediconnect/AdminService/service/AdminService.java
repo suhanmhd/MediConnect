@@ -25,6 +25,8 @@ public class AdminService {
     private final DepartmentRepository departmentRepository;
     private final Producer producer;
     private final Consumer consumer;
+    @Autowired
+    private ResponseHolder<List<Userdto>> doctorResponse;
 
 
     @Autowired
@@ -73,6 +75,8 @@ public class AdminService {
     }
 
     public List<Doctor> getAllDoctors() {
+
+
         producer.getAllDoctors();
 
         List<Doctor> getResponseDoctors = null;
@@ -85,6 +89,10 @@ public class AdminService {
 
       return  getResponseDoctors;
     }
+
+
+
+
 
     public Department getDepartmentById(UUID id) {
               Department department=departmentRepository.getById(id);
@@ -139,54 +147,32 @@ public class AdminService {
     }
 
     public List<Userdto> getAllUsers() {
-        CompletableFuture<List<Userdto>> future = new CompletableFuture<>();
-
-        ResponseHolder.setCompletableFuture(future);
 
         producer.getAllUsers();
+        return consumer.getReceivedUsers();
 
-        try {
-            return future.get(); // Wait for the response
-        } catch (Exception e) {
-            // Handle exceptions
-            return null;
-        }
 
     }
 
-//    public void setReceivedUsers(List<Userdto> userList) {
-//        future.complete(userList); // Set the future result
-//    }
 
     public Userdto blockUser(UUID id) {
 
       UserId userId = new UserId();
        userId.setId(id);
-        CompletableFuture<Userdto> future = new CompletableFuture<>();
-//        ResponseHolder.setCompletableFuture(future);
-
 
         //KAFKA PRODUCER TO SEND USER ID TO THE USER SERVICE
         producer.sendBlockUser(userId);
 
 
-        try {
-            return future.get(); // Wait for the response
-        } catch (Exception e) {
-            // Handle exceptions
-            return null;
-        }
-
-
         //KAFKA CONSUMER TO RECIEVE RES FROM  USER SERVICE TO ADMIN
-//      Userdto user = null;
-//
-//        while (user == null) {
-//
-//          user= consumer.getReceivedBlockedUser();
-//
-//        }
-//        return user;
+      Userdto user = null;
+
+        while (user == null) {
+
+          user= consumer.getReceivedBlockedUser();
+
+        }
+        return user;
 
 
     }
@@ -196,11 +182,11 @@ public class AdminService {
         userId.setId(id);
         producer.sendUnBlockUser(userId);
 
-//        Userdto user = null;
-//        while (user == null) {
-//            user= consumer.getReceivedUnBlockedUser();
-//        }
-        List<Userdto> getResponseUsers= consumer.getReceivedUnBlockedUser();
+        List<Userdto> getResponseUsers = null;
+        while (getResponseUsers == null) {
+            getResponseUsers=consumer.getReceivedUnBlockedUser();
+        }
+
 
         return getResponseUsers;
     }

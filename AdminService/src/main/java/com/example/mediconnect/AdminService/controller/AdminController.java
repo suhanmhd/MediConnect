@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/admin")
@@ -72,12 +74,30 @@ public ResponseEntity<String>addDepartment(@RequestBody Department department){
     @GetMapping("/doctors")
     public ResponseEntity<Map<String, List>> getAllDoctors(){
         System.out.println("doc req send");
-        List<Doctor> responseDoctors=adminService.getAllDoctors();
+        List<Doctor> responseDoctors= (List<Doctor>) adminService.getAllDoctors();
         Map<String, List> response = new HashMap<>();
         response.put("doctorDetails",responseDoctors);
         System.out.println("----"+response);
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
+
+
+
+//    @GetMapping("/doctors")
+//    public ResponseEntity<Map<String, List<Doctor>>> getAllDoctors() {
+//
+//        CompletableFuture<List<Doctor>> doctorsFuture = adminService.getAllDoctors();
+//
+//        try {
+//            List<Doctor> responseDoctors = doctorsFuture.get(); // This will block until the future is completed
+//            Map<String, List<Doctor>> response = new HashMap<>();
+//
+//            return new ResponseEntity<>(response, HttpStatus.OK);
+//        } catch (InterruptedException | ExecutionException e) {
+//            e.printStackTrace();
+//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
 
     @GetMapping("/users")

@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class DoctorSlotDto {
 
-    private UUID id;
+    private UUID doctor_id;
 
-    private List<AvailableSlotDTO> availableSlots;
+    private List<AvailableSlotDTO> available_slots;
 }

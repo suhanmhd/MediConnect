@@ -187,10 +187,10 @@ public class DoctorService {
 
     public void updateBookingSlot(DoctorSlotDto doctorSlotDto) {
 
-        Optional<DoctorCredentials> optionalDoctor = doctorRepository.findById(doctorSlotDto.getId());
+        Optional<DoctorCredentials> optionalDoctor = doctorRepository.findById(doctorSlotDto.getDoctor_id());
         if (optionalDoctor.isPresent()) {
             DoctorCredentials doctor = optionalDoctor.get();
-            List<AvailableSlotDTO> availableSlots = doctorSlotDto.getAvailableSlots();
+            List<AvailableSlotDTO> availableSlots = doctorSlotDto.getAvailable_slots();
 
             // Create AvailableSlot entities and set the data
             for (AvailableSlotDTO slotDTO : availableSlots) {
@@ -208,7 +208,7 @@ public class DoctorService {
     }
 
     public List<String> getTimeSlotsByDate(DoctorSlotDto doctorSlotDto, LocalDate date) {
-        Optional<DoctorCredentials> optionalDoctor = doctorRepository.findById(doctorSlotDto.getId());
+        Optional<DoctorCredentials> optionalDoctor = doctorRepository.findById(doctorSlotDto.getDoctor_id());
         if (optionalDoctor.isPresent()) {
             DoctorCredentials doctor = optionalDoctor.get();
 
