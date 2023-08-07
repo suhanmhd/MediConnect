@@ -56,9 +56,6 @@ public class AuthController {
 
     @PostMapping("/doctor/register")
     public String saveDoctor(@RequestBody DoctorDetails doctorDetails){
-        System.out.println("hello");
-        System.out.println(doctorDetails.getFirstname());
-        System.out.println(doctorDetails.getTimings());
 
 
         return authenticationService.saveDoctor(doctorDetails);

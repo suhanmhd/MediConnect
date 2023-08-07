@@ -162,12 +162,14 @@ public class AdminService {
 
         //KAFKA PRODUCER TO SEND USER ID TO THE USER SERVICE
         producer.sendBlockUser(userId);
+        System.out.println("reqest send to user service");
 
 
         //KAFKA CONSUMER TO RECIEVE RES FROM  USER SERVICE TO ADMIN
       Userdto user = null;
 
         while (user == null) {
+            System.out.println("waiting for blocked res");
 
           user= consumer.getReceivedBlockedUser();
 

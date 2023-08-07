@@ -1,6 +1,6 @@
 package com.example.mediconnect.UserService.repository;
 
-import com.example.mediconnect.UserService.entity.UserDetails;
+import com.example.mediconnect.UserService.entity.user.UserDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

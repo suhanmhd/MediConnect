@@ -1,5 +1,6 @@
-package com.example.mediconnect.UserService.entity;
+package com.example.mediconnect.UserService.entity.user;
 
+import com.example.mediconnect.UserService.entity.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

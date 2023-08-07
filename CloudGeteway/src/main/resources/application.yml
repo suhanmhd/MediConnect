@@ -25,12 +25,12 @@ spring:
 #              - OPTIONS
 
       routes:
-        - id: ADMIN-SERVICE
-          uri: lb://ADMIN-SERVICE
-          predicates:
-            - Path=/admin/**
-          filters:
-            - AuthenticationFilter
+#        - id: ADMIN-SERVICE
+#          uri: lb://ADMIN-SERVICE
+#          predicates:
+#            - Path=/admin/**
+#          filters:
+#            - AuthenticationFilter
 
         - id: AUTH-SERVICE
           uri: lb://AUTH-SERVICE
@@ -46,16 +46,14 @@ spring:
         - id: USER-SERVICE
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user/**
+             - Path=/user/**
+
+
+
           filters:
             - AuthenticationFilter
 
-        - id: DOCTOR-SERVICE
-          uri: lb://DOCTOR-SERVICE
-          predicates:
-            - Path=/doctor/**
-          filters:
-            - AuthenticationFilter
+
 
 eureka:
   client:

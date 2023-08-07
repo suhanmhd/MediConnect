@@ -110,11 +110,11 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
                     // Check if the user has the required role for accessing the route
                     String routePath = exchange.getRequest().getURI().getPath();
-                    if (routePath.startsWith("/admin")) {
+                    if (routePath.startsWith("/user/admin")) {
                         if (!roles.contains("ADMIN")) {
                             throw new RuntimeException("Unauthorized access. Required role: ADMIN");
                         }
-                    } else if (routePath.startsWith("/doctor")) {
+                    } else if (routePath.startsWith("/user/doctor")) {
                         if (!roles.contains("DOCTOR")) {
                             throw new RuntimeException("Unauthorized access. Required role: DOCTOR");
                         }

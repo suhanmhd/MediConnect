@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 import java.util.List;
 import java.util.UUID;
 
@@ -27,13 +28,17 @@ public class Doctor {
 
     private String name;
 
-    private List<String> timings;
+
 
 
 
     private boolean enabled;
 
     private  String isApproved;
+
+    private String location;
+
+    private String about;
 
 
     private String specialization;
@@ -45,4 +50,8 @@ public class Doctor {
     private long feesPerConsultation;
 
     private  String license;
+
+    private List<JobHistoryDTO> jobHistoryList;
+    private List<EducationDTO> educationList;
+    private ClinicInfoDTO clinicInfo;
 }

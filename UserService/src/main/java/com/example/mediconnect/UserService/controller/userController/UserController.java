@@ -1,6 +1,7 @@
-package com.example.mediconnect.UserService.controller;
+package com.example.mediconnect.UserService.controller.userController;
 
 import com.example.mediconnect.UserService.dto.*;
+import com.example.mediconnect.UserService.dto.user.SlotResponseListDTO;
 import com.example.mediconnect.UserService.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -37,18 +38,13 @@ public class UserController {
     }
 
 
-    @GetMapping("/getDoctorByCategory/{departmentName}")
-
-    public ResponseEntity<Map<String, List>> getDoctorByDepartment(@PathVariable("departmentName") String departmentName) {
-        System.out.println(departmentName);
-
-        List<Doctor> doctorList = userService.getDoctorByDepartment(departmentName);
-        System.out.println(doctorList);
+    @GetMapping("/getAllDoctors")
+    public ResponseEntity<Map<String,List>>getAllDoctorsToUser(){
+        List<Doctor> doctorList = userService.getAllDoctorsToUser();
         Map<String, List> response = new HashMap<>();
         response.put("doctorDetails", doctorList);
-
-
         return ResponseEntity.status(HttpStatus.OK).body(response);
+
     }
 
 
@@ -60,7 +56,15 @@ public class UserController {
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
 
+    @GetMapping("/getAvailableSlot/{doctorId}")
+    public ResponseEntity <Map<String, SlotResponseListDTO>>getAvailableSlot(@PathVariable("doctorId") UUID doctorId) {
+        SlotResponseListDTO availableSlots = userService.getAvailableSlots(doctorId);
+        Map<String,SlotResponseListDTO>response = new HashMap<>();
+        response.put("slot",availableSlots);
+        return  new ResponseEntity<>(response,HttpStatus.OK);
 
+
+    }
 
 
 
@@ -81,9 +85,9 @@ public class UserController {
         System.out.println(appointmentData+"hello000000000000000000000000000000000000000000000000000");
 
 
+     boolean res=true;
 
-
-       boolean res=userService.checkAvailability(appointmentData);
+//       boolean res=userService.checkAvailability(appointmentData);
         Map<String, Object> response = new HashMap<>();
 
 

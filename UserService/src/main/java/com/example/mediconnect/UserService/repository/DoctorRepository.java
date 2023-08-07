@@ -1,6 +1,6 @@
-package com.example.mediconnect.DoctorService.repository;
+package com.example.mediconnect.UserService.repository;
 
-import com.example.mediconnect.DoctorService.entity.DoctorCredentials;
+import com.example.mediconnect.UserService.entity.doctor.DoctorCredentials;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,58 +1,62 @@
-package com.example.mediconnect.AdminService.controller;
+package com.example.mediconnect.UserService.controller;
 
-import com.example.mediconnect.AdminService.dto.ApproveRequest;
-import com.example.mediconnect.AdminService.dto.DepartmentResponse;
-import com.example.mediconnect.AdminService.dto.Doctor;
-import com.example.mediconnect.AdminService.dto.Userdto;
-import com.example.mediconnect.AdminService.entity.Department;
-import com.example.mediconnect.AdminService.kafka.Producer;
-import com.example.mediconnect.AdminService.service.AdminService;
+import com.example.mediconnect.UserService.dto.ApproveRequest;
+import com.example.mediconnect.UserService.dto.DepartmentResponse;
+import com.example.mediconnect.UserService.dto.Doctor;
+import com.example.mediconnect.UserService.dto.Userdto;
+import com.example.mediconnect.UserService.entity.doctor.Department;
+import com.example.mediconnect.UserService.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/user/admin")
 //@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
 
 
 
+  @Autowired
+    private AdminService adminService;
 
-    private final AdminService adminService;
 
-    @Autowired
-    public AdminController(AdminService adminService) {
-        this.adminService = adminService;
+
+
+    @PostMapping("/add/department")
+    public ResponseEntity<String>addDepartment(@RequestBody Department department){
+        System.out.println("hlell");
+        System.out.println(department);
+        String dept= adminService.addDepartment(department);
+        return new ResponseEntity<>(dept,HttpStatus.CREATED);
+    }
+
+    @GetMapping("/departments")
+    public ResponseEntity<Map<String, List>> getAllDepartments(){
+        List<DepartmentResponse> departmentResponses= adminService.getAllDepartments();
+        Map<String, List> response = new HashMap<>();
+        response.put("categoryDetails",departmentResponses );
+        return  new ResponseEntity<>(response,HttpStatus.OK);
+
     }
 
 
-@PostMapping("/add/department")
-public ResponseEntity<String>addDepartment(@RequestBody Department department){
-    System.out.println(department);
-     String dept= adminService.addDepartment(department);
-       return new ResponseEntity<>(dept,HttpStatus.CREATED);
-}
+    @GetMapping("/department")
+    public ResponseEntity<Map<String, List>> getAllDepartmentsForDoctorSignup(){
+        List<DepartmentResponse> departmentResponses= adminService.getAllDepartmentsForDoctorSignup();
+        Map<String, List> response = new HashMap<>();
+        response.put("categoryDetails",departmentResponses );
+        return  new ResponseEntity<>(response,HttpStatus.OK);
 
-@GetMapping("/departments")
-    public ResponseEntity<Map<String, List>> getAllDepartments(){
-    List<DepartmentResponse> departmentResponses= adminService.getAllDepartments();
-    Map<String, List> response = new HashMap<>();
-    response.put("categoryDetails",departmentResponses );
-    return  new ResponseEntity<>(response,HttpStatus.OK);
-
-}
-
+    }
 
     @GetMapping ("/department/{id}")
     public  ResponseEntity<Department> getDepartmentById(@PathVariable("id")UUID id){
@@ -65,19 +69,28 @@ public ResponseEntity<String>addDepartment(@RequestBody Department department){
 
     @GetMapping ("/delete/department/{id}")
     public  ResponseEntity<Map<String, List>> deleteDepartmentById(@PathVariable("id")UUID id){
-    adminService.deleteDepartmentById(id);
-    return ResponseEntity.noContent().header("Location", "/departments").build();
-}
+        adminService.deleteDepartmentById(id);
+        return ResponseEntity.noContent().header("Location", "/departments").build();
+    }
 
+    @GetMapping("/users")
+    public ResponseEntity<Map<String, List>>getAllUsers(){
+
+        List<Userdto> responseUsers=adminService.getAllUsers();
+        Map<String, List> response = new HashMap<>();
+        response.put("userDetails",responseUsers);
+
+        return  new ResponseEntity<>(response,HttpStatus.CREATED);
+    }
 
 
     @GetMapping("/doctors")
     public ResponseEntity<Map<String, List>> getAllDoctors(){
-        System.out.println("doc req send");
-        List<Doctor> responseDoctors= (List<Doctor>) adminService.getAllDoctors();
+
+        List<Doctor> responseDoctors= adminService.getAllDoctors();
         Map<String, List> response = new HashMap<>();
         response.put("doctorDetails",responseDoctors);
-        System.out.println("----"+response);
+
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
 
@@ -100,11 +113,9 @@ public ResponseEntity<String>addDepartment(@RequestBody Department department){
 //    }
 
 
-
-
     @GetMapping("/pendingApprovals")
     public ResponseEntity<Map<String, List>> getpendingApprovals(){
-               List<Doctor> pendingApprovals=adminService.getpendingApprovals();
+        List<Doctor> pendingApprovals=adminService.getpendingApprovals();
         Map<String, List> response = new HashMap<>();
         response.put("approvalDetails",pendingApprovals);
         return  new ResponseEntity<>(response,HttpStatus.OK);
@@ -112,21 +123,24 @@ public ResponseEntity<String>addDepartment(@RequestBody Department department){
 
 
     @PostMapping("/approve")
-    public ResponseEntity<Void> ApproveDoctor(@RequestBody ApproveRequest request) {
-        adminService.ApproveDoctor(request);
+    public ResponseEntity<Map<String,Doctor>> ApproveDoctor(@RequestBody ApproveRequest request) {
+       Doctor doctor=adminService.ApproveDoctor(request);
         System.out.println(request);
-        return ResponseEntity.noContent().header("Location", "/pendingApprovals").build();
+        Map<String,Doctor> response = new HashMap<>();
+        response.put("approvalDetails",doctor);
+        return  new ResponseEntity<>(response,HttpStatus.OK);
+
     }
-@GetMapping("/blockDoctor/{id}")
-public ResponseEntity<Map<String, Doctor>> blockDoctor(@PathVariable("id") UUID id){
+    @GetMapping("/blockDoctor/{id}")
+    public ResponseEntity<Map<String, Doctor>> blockDoctor(@PathVariable("id") UUID id){
 
         Doctor doctor=adminService.blockDoctor(id);
-    System.out.println(doctor);
-    Map<String,Doctor> response = new HashMap<>();
-    response.put("doctorDetails",doctor);
-    System.out.println(response);
-    return  new ResponseEntity<>(response,HttpStatus.OK);
-}
+
+        Map<String,Doctor> response = new HashMap<>();
+        response.put("doctorDetails",doctor);
+        System.out.println(response);
+        return  new ResponseEntity<>(response,HttpStatus.OK);
+    }
 
 
 
@@ -142,45 +156,26 @@ public ResponseEntity<Map<String, Doctor>> blockDoctor(@PathVariable("id") UUID 
     }
 
 
-
-    @GetMapping("/users")
-    public ResponseEntity<Map<String, List>>getAllUsers(){
-        System.out.println("user req send");
-        List<Userdto> responseUsers=adminService.getAllUsers();
-        Map<String, List> response = new HashMap<>();
-        response.put("userDetails",responseUsers);
-        System.out.println("{get all user data}"+response);
-        return  new ResponseEntity<>(response,HttpStatus.CREATED);
-    }
-
-
-
-
-
-
-
     @GetMapping("/blockUser/{userId}")
     public ResponseEntity<Map<String,Object>> blockUser(@PathVariable("userId") UUID id){
 
-    Userdto user=adminService.blockUser(id);
+        Userdto user=adminService.blockUser(id);
         System.out.println(id);
         Map<String,Object> response = new HashMap<>();
         response.put("userDetails",user);
-        response.put("status","ok");
-        System.out.println("{blocked res}"+response);
+
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
-
-
+//
+//
     @GetMapping("/unblockUser/{userId}")
     public ResponseEntity<Map<String,Object>> unBlockUser(@PathVariable("userId") UUID id){
 
-        List<Userdto> user=adminService.UnBlockUser(id);
+        Userdto user=adminService.UnBlockUser(id);
         System.out.println(id);
         Map<String,Object> response = new HashMap<>();
         response.put("userDetails",user);
-        response.put("status","ok");
-        System.out.println("[unblock res]"+response);
+
 
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }

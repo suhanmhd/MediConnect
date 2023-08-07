@@ -31,7 +31,7 @@ public class DoctorDetails {
 
     private String isApproved;
 
-    private List<String> timings;
+//    private List<String> timings;
 
 
     private String specialization;

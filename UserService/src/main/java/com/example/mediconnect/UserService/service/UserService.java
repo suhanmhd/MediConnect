@@ -1,10 +1,21 @@
 package com.example.mediconnect.UserService.service;
 
 import com.example.mediconnect.UserService.dto.*;
-import com.example.mediconnect.UserService.entity.UserDetails;
+//import com.example.mediconnect.UserService.dto.doctor.AvailableSlotResonseDTO;
+//import com.example.mediconnect.UserService.dto.doctor.SlotResponseDTO;
+import com.example.mediconnect.UserService.dto.doctor.AvailableSlotResonseDTO;
+import com.example.mediconnect.UserService.dto.user.AvailableSlotToUserDTO;
+import com.example.mediconnect.UserService.dto.user.SlotResponseListDTO;
+import com.example.mediconnect.UserService.dto.user.SlotResponseToUserDTO;
+import com.example.mediconnect.UserService.entity.AvailableSlot;
+import com.example.mediconnect.UserService.entity.Slot;
+import com.example.mediconnect.UserService.entity.doctor.DoctorCredentials;
+import com.example.mediconnect.UserService.entity.user.UserDetails;
 import com.example.mediconnect.UserService.kafka.BookingConsumer;
 import com.example.mediconnect.UserService.kafka.DepartmentConsumer;
 import com.example.mediconnect.UserService.kafka.Producer;
+import com.example.mediconnect.UserService.repository.AvailableSlotRepository;
+import com.example.mediconnect.UserService.repository.DoctorRepository;
 import com.example.mediconnect.UserService.repository.UserDetailsRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -22,6 +33,9 @@ import static org.springframework.beans.BeanUtils.copyProperties;
 @Service
 public class UserService {
 
+    @Autowired
+    private DoctorRepository doctorRepository;
+
     @Value("${secret.key}")
     private String SECRETKEY;
 
@@ -34,6 +48,10 @@ public class UserService {
     private Producer producer;
     @Autowired
     private BookingConsumer bookingConsumer;
+
+
+    @Autowired
+    private AvailableSlotRepository availableSlotRepository;
 
     private final Object lock = new Object();
 
@@ -56,29 +74,35 @@ public class UserService {
         return departmentResponses;
     }
 
-    public List<Doctor> getDoctorByDepartment(String departmentName) {
-        producer.getDoctorByDepartment(departmentName);
 
-        List<Doctor> doctorList=null;
-               while (doctorList==null) {
-                   doctorList=departmentConsumer.getReceivedDoctors();
-               }
-
-         return doctorList;
+    public List<Doctor> getAllDoctorsToUser() {
+         List<DoctorCredentials> doctorList = doctorRepository.findAll();
+         List<Doctor>doctors =new ArrayList<>();
+           for (DoctorCredentials doctorCredentials:doctorList){
+               Doctor doctor = new Doctor();
+               copyProperties(doctorCredentials,doctor);
+               doctors.add(doctor);
+           }
+           return doctors;
     }
 
     public Doctor getDoctorById(UUID id) {
 
-        DoctorId doctorId =new DoctorId();
-        doctorId.setId(id);
-
-
-        producer.getDoctorById(doctorId);
-        Doctor doctor=null;
-        while (doctor==null) {
-            doctor= departmentConsumer.getReceivedDoctor();
-        }
+        DoctorCredentials doctorCredentials = doctorRepository.getById(id);
+        Doctor doctor = new Doctor();
+        copyProperties(doctorCredentials,doctor);
         return doctor;
+//
+//        DoctorId doctorId =new DoctorId();
+//        doctorId.setId(id);
+//
+//
+//        producer.getDoctorById(doctorId);
+//        Doctor doctor=null;
+//        while (doctor==null) {
+//            doctor= departmentConsumer.getReceivedDoctor();
+//        }
+//        return doctor;
     }
 
     public void getAllUsers() {
@@ -134,86 +158,86 @@ public class UserService {
 
     }
 
-    public boolean checkAvailability(AppointmentData appointmentData) {
-
-
-        String date = appointmentData.getDate();
-        String fromTime = appointmentData.getTime();
-
-
-
-        LocalDate today = LocalDate.now();
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
-        LocalDate selectedDate = LocalDate.parse(date, dateFormatter);
-
-        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("h:mm a");
-        LocalTime toTimeObj = LocalTime.parse(fromTime, inputFormatter);
-
-
-        LocalTime addedTime = toTimeObj.plusMinutes(16);
-
-        // Format the added time as "h:mm a"
-        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("h:mm a");
-        String toTime = addedTime.format(outputFormatter);
-
-        System.out.println(toTime);
-
-
-
-
-
-        Doctor doctor = getDoctorById(appointmentData.getDocId());
-        System.out.println(doctor);
-
-            producer.getAllAppointmentsByDoctorId(appointmentData.getDocId());
-        System.out.println("hello");
-          List<Appointment> appointment =  bookingConsumer.getAllReceivedAppointmetTimes();
-        System.out.println(":::"+appointment+"::::");
-        List<Appointment> appointments = new ArrayList<>();
-
-        for(Appointment appointmentlist: appointment ){
-            if(appointmentlist.getDate().equals(date)){
-                appointments.add(appointmentlist);
-            }
-        }
-        if (selectedDate.isBefore(today)) {
-            return false;
-        }
-
-        if (doctor != null && doctor.getTimings().size() >= 2) {
-            LocalTime doctorStartTime = LocalTime.parse(doctor.getTimings().get(0), inputFormatter);
-            LocalTime doctorEndTime = LocalTime.parse(doctor.getTimings().get(1), inputFormatter);
-
-            if (toTimeObj.compareTo(doctorStartTime) >= 0 && toTimeObj.compareTo(doctorEndTime) <= 0) {
-
-                for(Appointment appointmentTime: appointments){
-
-                    LocalTime AppointmentTime =LocalTime.parse(appointmentTime.getTime(),inputFormatter);
-                    LocalTime appointmentTimePlus15 = AppointmentTime.plusMinutes(15);
-
-                    if(toTimeObj.isAfter(AppointmentTime)&&toTimeObj.isBefore(appointmentTimePlus15)){
-                        return false;
-                    }
-                    if(AppointmentTime.isAfter(toTimeObj)&&AppointmentTime.isBefore(addedTime)){
-                        return false;
-                    }
-                }
-
-                System.out.println("success");
-                return true;
-
-
-            } else {
-                System.out.println("not");
-                return false;
-
-            }
-
-
-        }
-        return false;
-    }
+//    public boolean checkAvailability(AppointmentData appointmentData) {
+//
+//
+//        String date = appointmentData.getDate();
+//        String fromTime = appointmentData.getTime();
+//
+//
+//
+//        LocalDate today = LocalDate.now();
+//        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+//
+//        LocalDate selectedDate = LocalDate.parse(date, dateFormatter);
+//
+//        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("h:mm a");
+//        LocalTime toTimeObj = LocalTime.parse(fromTime, inputFormatter);
+//
+//
+//        LocalTime addedTime = toTimeObj.plusMinutes(16);
+//
+//        // Format the added time as "h:mm a"
+//        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("h:mm a");
+//        String toTime = addedTime.format(outputFormatter);
+//
+//        System.out.println(toTime);
+//
+//
+//
+//
+//
+//        Doctor doctor = getDoctorById(appointmentData.getDocId());
+//        System.out.println(doctor);
+//
+//            producer.getAllAppointmentsByDoctorId(appointmentData.getDocId());
+//        System.out.println("hello");
+//          List<Appointment> appointment =  bookingConsumer.getAllReceivedAppointmetTimes();
+//        System.out.println(":::"+appointment+"::::");
+//        List<Appointment> appointments = new ArrayList<>();
+//
+//        for(Appointment appointmentlist: appointment ){
+//            if(appointmentlist.getDate().equals(date)){
+//                appointments.add(appointmentlist);
+//            }
+//        }
+//        if (selectedDate.isBefore(today)) {
+//            return false;
+//        }
+//
+//        if (doctor != null && doctor.getTimings().size() >= 2) {
+//            LocalTime doctorStartTime = LocalTime.parse(doctor.getTimings().get(0), inputFormatter);
+//            LocalTime doctorEndTime = LocalTime.parse(doctor.getTimings().get(1), inputFormatter);
+//
+//            if (toTimeObj.compareTo(doctorStartTime) >= 0 && toTimeObj.compareTo(doctorEndTime) <= 0) {
+//
+//                for(Appointment appointmentTime: appointments){
+//
+//                    LocalTime AppointmentTime =LocalTime.parse(appointmentTime.getTime(),inputFormatter);
+//                    LocalTime appointmentTimePlus15 = AppointmentTime.plusMinutes(15);
+//
+//                    if(toTimeObj.isAfter(AppointmentTime)&&toTimeObj.isBefore(appointmentTimePlus15)){
+//                        return false;
+//                    }
+//                    if(AppointmentTime.isAfter(toTimeObj)&&AppointmentTime.isBefore(addedTime)){
+//                        return false;
+//                    }
+//                }
+//
+//                System.out.println("success");
+//                return true;
+//
+//
+//            } else {
+//                System.out.println("not");
+//                return false;
+//
+//            }
+//
+//
+//        }
+//        return false;
+//    }
 
 
     public  Map<String, Object> bookingAppoinment(AppointmentData appointmentData, String authorizationHeader) {
@@ -306,6 +330,73 @@ public class UserService {
         return updatedUser;
 
 
+    }
+
+
+//    public List<AvailableSlotResonseDTO> getAvailableSlots(UUID doctorId) {
+//        // Find the doctor by ID
+//        DoctorCredentials doctor = doctorRepository.findById(doctorId)
+//                .orElseThrow(() -> new IllegalArgumentException("Doctor with ID " + doctorId + " not found"));
+//
+//        // Get all available slots for the doctor
+//        List<AvailableSlot> availableSlots = availableSlotRepository.findByDoctor(doctor);
+//
+//        // Convert the entities to DTOs for the response
+//        List<AvailableSlotResonseDTO> availableSlotDTOs = new ArrayList<>();
+//        for (AvailableSlot availableSlot : availableSlots) {
+//            List<SlotResponseDTO> slotDTOs = new ArrayList<>();
+//            for (Slot slot : availableSlot.getSlots()) {
+//                SlotResponseDTO slotDTO = new SlotResponseDTO(
+//
+//                        slot.getId(),
+//                        slot.getStartTime(),
+//                        slot.getEndTime(),
+//                        slot.isStatus()
+//                );
+//                slotDTOs.add(slotDTO);
+//            }
+//            AvailableSlotResonseDTO availableSlotDTO = new AvailableSlotResonseDTO(availableSlot.getDate(), availableSlot.getDoctor().getId(), slotDTOs);
+//            availableSlotDTOs.add(availableSlotDTO);
+//        }
+//        return availableSlotDTOs;
+//    }
+
+    public SlotResponseListDTO getAvailableSlots(UUID doctorId) {
+        // Find the doctor by ID
+        DoctorCredentials doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new IllegalArgumentException("Doctor with ID " + doctorId + " not found"));
+
+        // Get all available slots for the doctor
+        List<AvailableSlot> availableSlots = availableSlotRepository.findByDoctor(doctor);
+
+        // Convert the entities to DTOs for the response
+        SlotResponseListDTO availableSlotListDTO = new SlotResponseListDTO();
+        List<AvailableSlotToUserDTO> availableSlotDTOs = new ArrayList<>();
+
+        for (AvailableSlot availableSlot : availableSlots) {
+            List<SlotResponseToUserDTO> slotDTOs = new ArrayList<>();
+            for (Slot slot : availableSlot.getSlots()) {
+                SlotResponseToUserDTO slotDTO = new SlotResponseToUserDTO(
+                        slot.getId(),
+                        slot.getStartTime(),
+                        slot.getEndTime(),
+                        slot.isStatus()
+                );
+                slotDTOs.add(slotDTO);
+            }
+            AvailableSlotToUserDTO availableSlotDTO = new AvailableSlotToUserDTO(
+                    availableSlot.getDate(),
+//                    doctorId, // Set the doctorId
+                    slotDTOs
+            );
+            availableSlotDTOs.add(availableSlotDTO);
+        }
+
+
+        availableSlotListDTO.setDoctorId(doctorId);
+        availableSlotListDTO.setSlotList(availableSlotDTOs);
+
+        return availableSlotListDTO;
     }
 }
 

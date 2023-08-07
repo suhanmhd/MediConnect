@@ -1,21 +1,15 @@
 package com.example.mediconnect.UserService.kafka;
 
-import com.example.mediconnect.UserService.dto.DepartmentResponse;
-import com.example.mediconnect.UserService.dto.Doctor;
 import com.example.mediconnect.UserService.dto.UserId;
-import com.example.mediconnect.UserService.entity.UserDetails;
+import com.example.mediconnect.UserService.entity.user.UserDetails;
 import com.example.mediconnect.UserService.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Component
 public class Consumer {

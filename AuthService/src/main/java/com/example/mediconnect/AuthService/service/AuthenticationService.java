@@ -179,9 +179,14 @@ public class AuthenticationService {
 
     public void blockUserById(UserId userId) {
         UserCredential userdata =userRepository.findById(userId.getId())
+
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: "));
+        System.out.println(userdata);
         userdata.setEnabled(false);
+
+
         userRepository.save(userdata);
+        System.out.println(userRepository.getById(userId.getId()));
 
     }
 

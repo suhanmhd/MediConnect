@@ -58,28 +58,6 @@ public class Consumer {
 
 
 
-    @KafkaListener(topics = "send_all_users_to_admin", groupId = "foo")
-    public void getUsers(String message) {
-        System.out.println(message);
-
-        ObjectMapper object = new ObjectMapper();
-
-    Userdto[] users = null;
-        List<Userdto> userList = null;
-        try {
-            users = object.readValue(message, Userdto[].class);
-            userList = Arrays.asList(users);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        this.receivedUsers=userList;
-
-    }
-
-    public List<Userdto> getReceivedUsers() {
-        return receivedUsers;
-    }
-
 
 
 
@@ -162,13 +140,35 @@ public class Consumer {
 
 
 
+    @KafkaListener(topics = "send_all_users_to_admin", groupId = "foo")
+    public void getUsers(String message) {
+        System.out.println("{user message catched by kafka }"+message);
+
+        ObjectMapper object = new ObjectMapper();
+
+        Userdto[] users = null;
+        List<Userdto> userList = null;
+        try {
+            users = object.readValue(message, Userdto[].class);
+            userList = Arrays.asList(users);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        this.receivedUsers=userList;
+
+    }
+
+    public List<Userdto> getReceivedUsers() {
+        return receivedUsers;
+    }
+
 
 
 
 
     @KafkaListener(topics = "send_all_user_by_blocked_id_topic", groupId = "foo")
     public void getBlockedUser(String message) {
-        System.out.println("message for"+message);
+        System.out.println("kafka blocked user"+message);
 
         ObjectMapper object = new ObjectMapper();
 
@@ -194,6 +194,7 @@ public class Consumer {
 
     @KafkaListener(topics = "send_all_user_by_un_blocked_id_topic", groupId = "foo")
     public void getUnBlockedUser(String message) {
+        System.out.println("kafka unblocked res"+message);
 
 //        ObjectMapper object = new ObjectMapper();
 //

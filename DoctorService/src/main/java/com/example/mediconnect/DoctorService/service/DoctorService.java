@@ -4,7 +4,6 @@ import com.example.mediconnect.DoctorService.dto.*;
 import com.example.mediconnect.DoctorService.entity.AvailableSlot;
 import com.example.mediconnect.DoctorService.entity.DoctorCredentials;
 import com.example.mediconnect.DoctorService.kafka.AppointmentConsumer;
-import com.example.mediconnect.DoctorService.kafka.Consumer;
 import com.example.mediconnect.DoctorService.kafka.Producer;
 import com.example.mediconnect.DoctorService.repository.DoctorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
