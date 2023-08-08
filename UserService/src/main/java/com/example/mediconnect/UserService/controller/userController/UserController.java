@@ -12,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RequestMapping("/user")
 @RestController
@@ -23,8 +20,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-
 
     @GetMapping("/getdepartments")
     public ResponseEntity<Map<String, List>> getDepartments() {
@@ -39,8 +34,15 @@ public class UserController {
 
 
     @GetMapping("/getAllDoctors")
-    public ResponseEntity<Map<String,List>>getAllDoctorsToUser(){
-        List<Doctor> doctorList = userService.getAllDoctorsToUser();
+    public ResponseEntity<Map<String,List>>getAllDoctorsToUser(@RequestParam("query") String keyword){
+        List<Doctor> doctorList;
+        if(keyword!=null){
+            doctorList = userService.searchDoctorsByName(keyword);
+        }
+        else{
+         doctorList = userService.getAllDoctorsToUser();
+        }
+
         Map<String, List> response = new HashMap<>();
         response.put("doctorDetails", doctorList);
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -56,6 +58,17 @@ public class UserController {
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
 
+
+    @GetMapping("/search")
+    public ResponseEntity<Map<String,List>>searchDoctorsByName(@RequestParam("query") String keyword) {
+
+
+        List<Doctor> doctorList = userService.searchDoctorsByName(keyword);
+        Map<String, List> response = new HashMap<>();
+        response.put("doctorDetails", doctorList);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @GetMapping("/getAvailableSlot/{doctorId}")
     public ResponseEntity <Map<String, SlotResponseListDTO>>getAvailableSlot(@PathVariable("doctorId") UUID doctorId) {
         SlotResponseListDTO availableSlots = userService.getAvailableSlots(doctorId);
@@ -65,21 +78,17 @@ public class UserController {
 
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    @PostMapping("/updateSlot/{slotId}/status")
+    public ResponseEntity<String> updateSlotStatus(@PathVariable UUID slotId, @RequestParam boolean newStatus) {
+        try {
+           userService.updateSlotStatus(slotId, newStatus);
+            return ResponseEntity.ok("Slot status updated successfully.");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Slot not found.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating the slot status.");
+        }
+    }
     @PostMapping("/check-availability")
     public ResponseEntity<Map<String, Object>>checkAvailability(@RequestBody AppointmentData appointmentData) {
         System.out.println(appointmentData+"hello000000000000000000000000000000000000000000000000000");
@@ -108,6 +117,7 @@ public class UserController {
 
     @PostMapping("/payment")
     public ResponseEntity<Map<String, Object>>bookingAppoinment(@RequestBody AppointmentData appointmentData, @RequestHeader("Authorization") String authorizationHeader) {
+        System.out.println(authorizationHeader);
 
   Map<String, Object> response=null;
           response=userService.bookingAppoinment(appointmentData,authorizationHeader);

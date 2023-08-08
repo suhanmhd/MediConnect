@@ -16,6 +16,7 @@ import com.example.mediconnect.UserService.kafka.DepartmentConsumer;
 import com.example.mediconnect.UserService.kafka.Producer;
 import com.example.mediconnect.UserService.repository.AvailableSlotRepository;
 import com.example.mediconnect.UserService.repository.DoctorRepository;
+import com.example.mediconnect.UserService.repository.SlotRepository;
 import com.example.mediconnect.UserService.repository.UserDetailsRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -27,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.springframework.beans.BeanUtils.copyProperties;
 
@@ -40,7 +42,7 @@ public class UserService {
     private String SECRETKEY;
 
     @Autowired
-    private  DepartmentConsumer  departmentConsumer;
+    private DepartmentConsumer departmentConsumer;
     @Autowired
     private UserDetailsRepository userDetailsRepository;
 
@@ -52,9 +54,10 @@ public class UserService {
 
     @Autowired
     private AvailableSlotRepository availableSlotRepository;
+    @Autowired
+    private SlotRepository slotRepository;
 
     private final Object lock = new Object();
-
 
 
     public void saveUser(UserDetails userDetails) {
@@ -64,33 +67,33 @@ public class UserService {
 
     public List<DepartmentResponse> getAllDepartments() {
 
-             producer.getAllDepartments();
+        producer.getAllDepartments();
 
-             List<DepartmentResponse> departmentResponses=null;
-             while(departmentResponses==null) {
-                 departmentResponses = departmentConsumer.getRecievedDepartmentResponse();
-             }
+        List<DepartmentResponse> departmentResponses = null;
+        while (departmentResponses == null) {
+            departmentResponses = departmentConsumer.getRecievedDepartmentResponse();
+        }
 
         return departmentResponses;
     }
 
 
     public List<Doctor> getAllDoctorsToUser() {
-         List<DoctorCredentials> doctorList = doctorRepository.findAll();
-         List<Doctor>doctors =new ArrayList<>();
-           for (DoctorCredentials doctorCredentials:doctorList){
-               Doctor doctor = new Doctor();
-               copyProperties(doctorCredentials,doctor);
-               doctors.add(doctor);
-           }
-           return doctors;
+        List<DoctorCredentials> doctorList = doctorRepository.findAll();
+        List<Doctor> doctors = new ArrayList<>();
+        for (DoctorCredentials doctorCredentials : doctorList) {
+            Doctor doctor = new Doctor();
+            copyProperties(doctorCredentials, doctor);
+            doctors.add(doctor);
+        }
+        return doctors;
     }
 
     public Doctor getDoctorById(UUID id) {
 
         DoctorCredentials doctorCredentials = doctorRepository.getById(id);
         Doctor doctor = new Doctor();
-        copyProperties(doctorCredentials,doctor);
+        copyProperties(doctorCredentials, doctor);
         return doctor;
 //
 //        DoctorId doctorId =new DoctorId();
@@ -106,12 +109,12 @@ public class UserService {
     }
 
     public void getAllUsers() {
-        List<UserDetails>userDetails =userDetailsRepository.findAll();
-        List<Userdto>userResponse = new ArrayList<>();
+        List<UserDetails> userDetails = userDetailsRepository.findAll();
+        List<Userdto> userResponse = new ArrayList<>();
 
-        for(UserDetails user:userDetails){
+        for (UserDetails user : userDetails) {
             Userdto userdto = new Userdto();
-            copyProperties(user,userdto);
+            copyProperties(user, userdto);
             userResponse.add(userdto);
         }
 
@@ -122,36 +125,35 @@ public class UserService {
 
 
     public void blockUserById(UserId userId) {
-       UserDetails  user=userDetailsRepository.getById(userId.getId());
+        UserDetails user = userDetailsRepository.getById(userId.getId());
 
 
-         user.setEnabled(false);
+        user.setEnabled(false);
         userDetailsRepository.save(user);
-       UserDetails userDetails=userDetailsRepository.getById(userId.getId());
+        UserDetails userDetails = userDetailsRepository.getById(userId.getId());
         System.out.println(userId);
 
-              Userdto userdto = new Userdto();
-        copyProperties(userDetails,userdto);
-        System.out.println("____"+userdto);
+        Userdto userdto = new Userdto();
+        copyProperties(userDetails, userdto);
+        System.out.println("____" + userdto);
 
         producer.sendblockUserRes(userdto);
     }
 
     public void UnblockUserById(UserId userId) {
-        UserDetails  user=userDetailsRepository.getById(userId.getId());
+        UserDetails user = userDetailsRepository.getById(userId.getId());
 
 
         user.setEnabled(true);
         userDetailsRepository.save(user);
-       List<UserDetails> userDetails=userDetailsRepository.findAll();
-        List<Userdto>userResponse = new ArrayList<>();
+        List<UserDetails> userDetails = userDetailsRepository.findAll();
+        List<Userdto> userResponse = new ArrayList<>();
 
-        for(UserDetails users:userDetails){
+        for (UserDetails users : userDetails) {
             Userdto userdto = new Userdto();
-            copyProperties(users,userdto);
+            copyProperties(users, userdto);
             userResponse.add(userdto);
         }
-
 
 
         producer.sendUnblockUserRes(userResponse);
@@ -240,40 +242,45 @@ public class UserService {
 //    }
 
 
-    public  Map<String, Object> bookingAppoinment(AppointmentData appointmentData, String authorizationHeader) {
+    public Map<String, Object> bookingAppoinment(AppointmentData appointmentData, String authorizationHeader) {
+        System.out.println("<<<<"+appointmentData);
+        appointmentData.getSlotId();
 
-        Doctor doctor= getDoctorById(appointmentData.getDocId());
+        updateSlotStatus(appointmentData.getSlotId(), true);
+
+
 
         String token = authorizationHeader.substring(7);
 
         Claims claims = Jwts.parser().setSigningKey(SECRETKEY).parseClaimsJws(token).getBody();
         String name = claims.getSubject();
-        String  role = (String) claims.get("role");
+        String role = (String) claims.get("role");
 
 //        Optional<UserDetails>userDetails =userDetailsRepository.findByName(name);
 
         UserDetails userDetails = userDetailsRepository.findByName(name)
                 .orElseThrow(() -> new NoSuchElementException("User details not found"));
+        System.out.println(userDetails);
+
+        Doctor doctor = getDoctorById(appointmentData.getDocId());
+        System.out.println(doctor);
 
 
-           AppointmentReq appointmentReq = AppointmentReq.builder()
-                   .docId(appointmentData.getDocId())
-                   .date(appointmentData.getDate())
-                   .time(appointmentData.getTime())
-                   .doctorInfo(doctor.getFirstname()+" "+ doctor.getLastname())
-                   .amount(doctor.getFeesPerConsultation())
-                   .userId(userDetails.getId())
-                   .userInfo(userDetails.getFirstname()+" "+userDetails.getLastname())
-                   .build();
+        AppointmentReq appointmentReq = AppointmentReq.builder()
+                .docId(appointmentData.getDocId())
+                .date(appointmentData.getDate())
+                .time(appointmentData.getTime())
+                .doctorInfo(doctor.getFirstname() + " " + doctor.getLastname())
+                .amount(doctor.getFeesPerConsultation())
+                .userId(userDetails.getId())
+                .userInfo(userDetails.getFirstname() + " " + userDetails.getLastname())
+                .build();
 
-           producer.bookingAppoinment(appointmentReq);
-
-
+        producer.bookingAppoinment(appointmentReq);
 
 
-
-    Map<String, Object> response=null;
-        response=bookingConsumer.getReceivedBookingRes();
+        Map<String, Object> response = null;
+        response = bookingConsumer.getReceivedBookingRes();
 
 
         synchronized (lock) {
@@ -287,9 +294,8 @@ public class UserService {
         }
 
 
-
         System.out.println(userDetails);
-        System.out.println(":::"+response);
+        System.out.println(":::" + response);
         System.out.println(name);
         return response;
     }
@@ -297,28 +303,28 @@ public class UserService {
     public List<Appointment> viewAppointments(UUID id) {
 
         producer.viewAppointments(id);
-        List<Appointment> appointmentList=bookingConsumer.getAllReceivedAppointmets();
+        List<Appointment> appointmentList = bookingConsumer.getAllReceivedAppointmets();
         return appointmentList;
     }
 
     public String cancelAppointemnt(AppointmentCanceldto appointmentCanceldto) {
-         producer.cancelAppointemnt(appointmentCanceldto);
-         return bookingConsumer.getCancelAppointemntRes();
+        producer.cancelAppointemnt(appointmentCanceldto);
+        return bookingConsumer.getCancelAppointemntRes();
 
     }
 
     public UserProfile getUserProfile(UUID id) {
 
-        UserDetails user=userDetailsRepository.findById(id).orElse(null);
-         UserProfile userProfile = new UserProfile();
-         copyProperties(user,userProfile);
-         return userProfile;
+        UserDetails user = userDetailsRepository.findById(id).orElse(null);
+        UserProfile userProfile = new UserProfile();
+        copyProperties(user, userProfile);
+        return userProfile;
 
     }
 
 
     public UserProfile updateUserProfile(UserProfile userProfile) {
-        UserDetails user = userDetailsRepository.findById(userProfile.getId()).orElseThrow( null);
+        UserDetails user = userDetailsRepository.findById(userProfile.getId()).orElseThrow(null);
 
 //        UserDetails user = userDetailsRepository.getById(userProfile.getId());
         user.setAge(userProfile.getAge());
@@ -326,54 +332,34 @@ public class UserService {
         user.setImage(userProfile.getImage());
         userDetailsRepository.save(user);
         UserProfile updatedUser = new UserProfile();
-        copyProperties(user,updatedUser);
+        copyProperties(user, updatedUser);
         return updatedUser;
 
 
     }
 
 
-//    public List<AvailableSlotResonseDTO> getAvailableSlots(UUID doctorId) {
-//        // Find the doctor by ID
-//        DoctorCredentials doctor = doctorRepository.findById(doctorId)
-//                .orElseThrow(() -> new IllegalArgumentException("Doctor with ID " + doctorId + " not found"));
-//
-//        // Get all available slots for the doctor
-//        List<AvailableSlot> availableSlots = availableSlotRepository.findByDoctor(doctor);
-//
-//        // Convert the entities to DTOs for the response
-//        List<AvailableSlotResonseDTO> availableSlotDTOs = new ArrayList<>();
-//        for (AvailableSlot availableSlot : availableSlots) {
-//            List<SlotResponseDTO> slotDTOs = new ArrayList<>();
-//            for (Slot slot : availableSlot.getSlots()) {
-//                SlotResponseDTO slotDTO = new SlotResponseDTO(
-//
-//                        slot.getId(),
-//                        slot.getStartTime(),
-//                        slot.getEndTime(),
-//                        slot.isStatus()
-//                );
-//                slotDTOs.add(slotDTO);
-//            }
-//            AvailableSlotResonseDTO availableSlotDTO = new AvailableSlotResonseDTO(availableSlot.getDate(), availableSlot.getDoctor().getId(), slotDTOs);
-//            availableSlotDTOs.add(availableSlotDTO);
-//        }
-//        return availableSlotDTOs;
-//    }
+// ...
 
     public SlotResponseListDTO getAvailableSlots(UUID doctorId) {
         // Find the doctor by ID
         DoctorCredentials doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new IllegalArgumentException("Doctor with ID " + doctorId + " not found"));
 
-        // Get all available slots for the doctor
-        List<AvailableSlot> availableSlots = availableSlotRepository.findByDoctor(doctor);
+        // Get all available slots for the doctor and sort them based on date
+        List<AvailableSlot> availableSlots = availableSlotRepository.findByDoctorOrderByDate(doctor);
+
+        // Filter out slots that are before today's date
+        LocalDate today = LocalDate.now();
+        List<AvailableSlot> filteredSlots = availableSlots.stream()
+                .filter(slot -> slot.getDate().isAfter(today.minusDays(1))) // include today as well
+                .collect(Collectors.toList());
 
         // Convert the entities to DTOs for the response
         SlotResponseListDTO availableSlotListDTO = new SlotResponseListDTO();
         List<AvailableSlotToUserDTO> availableSlotDTOs = new ArrayList<>();
 
-        for (AvailableSlot availableSlot : availableSlots) {
+        for (AvailableSlot availableSlot : filteredSlots) {
             List<SlotResponseToUserDTO> slotDTOs = new ArrayList<>();
             for (Slot slot : availableSlot.getSlots()) {
                 SlotResponseToUserDTO slotDTO = new SlotResponseToUserDTO(
@@ -386,17 +372,97 @@ public class UserService {
             }
             AvailableSlotToUserDTO availableSlotDTO = new AvailableSlotToUserDTO(
                     availableSlot.getDate(),
-//                    doctorId, // Set the doctorId
                     slotDTOs
             );
             availableSlotDTOs.add(availableSlotDTO);
         }
-
 
         availableSlotListDTO.setDoctorId(doctorId);
         availableSlotListDTO.setSlotList(availableSlotDTOs);
 
         return availableSlotListDTO;
     }
+
+
+//    public SlotResponseListDTO getAvailableSlots(UUID doctorId) {
+//        // Find the doctor by ID
+//        DoctorCredentials doctor = doctorRepository.findById(doctorId)
+//                .orElseThrow(() -> new IllegalArgumentException("Doctor with ID " + doctorId + " not found"));
+//
+//        // Get all available slots for the doctor and sort them based on date
+//        List<AvailableSlot> availableSlots = availableSlotRepository.findByDoctorOrderByDate(doctor);
+//
+//        // Convert the entities to DTOs for the response
+//        SlotResponseListDTO availableSlotListDTO = new SlotResponseListDTO();
+//        List<AvailableSlotToUserDTO> availableSlotDTOs = new ArrayList<>();
+//
+//        for (AvailableSlot availableSlot : availableSlots) {
+//            List<SlotResponseToUserDTO> slotDTOs = new ArrayList<>();
+//            for (Slot slot : availableSlot.getSlots()) {
+//                SlotResponseToUserDTO slotDTO = new SlotResponseToUserDTO(
+//                        slot.getId(),
+//                        slot.getStartTime(),
+//                        slot.getEndTime(),
+//                        slot.isStatus()
+//                );
+//                slotDTOs.add(slotDTO);
+//            }
+//            AvailableSlotToUserDTO availableSlotDTO = new AvailableSlotToUserDTO(
+//                    availableSlot.getDate(),
+//                    slotDTOs
+//            );
+//            availableSlotDTOs.add(availableSlotDTO);
+//        }
+//
+//        availableSlotListDTO.setDoctorId(doctorId);
+//        availableSlotListDTO.setSlotList(availableSlotDTOs);
+//
+//        return availableSlotListDTO;
+//    }
+
+
+
+    public void updateSlotStatus(UUID slotId, boolean newStatus) {
+        // Find the slot by ID
+        Optional<Slot> optionalSlot = slotRepository.findById(slotId);
+
+        if (optionalSlot.isPresent()) {
+            Slot slot = optionalSlot.get();
+
+            // Update the status of the slot to true
+            slot.setStatus(newStatus);
+
+            // Save the updated slot back to the database
+            slotRepository.save(slot);
+        } else {
+            // Handle case where the slot with the given ID doesn't exist
+            throw new RuntimeException("Slot not found");
+        }
+
+
+    }
+
+    public List<Doctor> searchDoctorsByName(String keyword) {
+        List<DoctorCredentials> doctorList =  doctorRepository.findByKeyword(keyword);
+                List<Doctor>doctors =new ArrayList<>();
+        for (DoctorCredentials doctorCredentials:doctorList){
+            Doctor doctor = new Doctor();
+            copyProperties(doctorCredentials,doctor);
+            doctors.add(doctor);
+        }
+        return doctors;
+    }
+
+
 }
+
+
+
+
+
+
+//    public List<Doctor> searchDoctorsByName(String searchQuery) {
+//        return null;
+//    }
+
 

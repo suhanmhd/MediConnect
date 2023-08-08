@@ -8,18 +8,13 @@ import com.example.mediconnect.AppoinmentService.entity.Appointment;
 import com.example.mediconnect.AppoinmentService.kafka.Producer;
 import com.example.mediconnect.AppoinmentService.repository.AppointmentRepository;
 import com.razorpay.Order;
-import com.razorpay.Payment;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 
-import org.apache.tomcat.util.net.openssl.ciphers.MessageDigest;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -28,8 +23,6 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
-import java.security.Security;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -238,13 +231,14 @@ public class AppointmentService {
 
     }
 
-    public void getAppointmentRequest(String doctorId) {
+    public List<Appointment> getAppointmentRequest(String doctorId) {
         List<Appointment> appointmentRequests = appointmentRepository.findAllByDoctorId(doctorId);
 
-        producer.getAppointmentRequests(appointmentRequests);
+//        producer.getAppointmentRequests(appointmentRequests);
         System.out.println("-----");
         System.out.println(appointmentRequests);
 
+        return appointmentRequests;
     }
 
     public String updateAppointmentStatus(AppointmentStatus appointmentStatus) {
@@ -261,7 +255,7 @@ public class AppointmentService {
     }
 
 
-    public void getTodaysAppointment(String doctorId) {
+    public List<Appointment> getTodaysAppointments(String doctorId) {
         LocalDate today = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
@@ -276,7 +270,8 @@ public class AppointmentService {
                     return  appointmentDate.equals(today);
                 })
                 .collect(Collectors.toList());
-        producer.getTodaysAppointments(todaysAppointments);
+//        producer.getTodaysAppointments(todaysAppointments);
+        return todaysAppointments;
     }
 
     public void getAppointmentTimes(String doctorId) {
@@ -285,17 +280,38 @@ public class AppointmentService {
         producer.getAppointmentTime(appointmentTimes);
     }
 
+    public List<DoctorInfo> getBookedDoctors(UUID id) {
+        List<Appointment> appointments = appointmentRepository.findAllByUserId(id.toString());
 
-public List<DoctorInfo> getBookedDoctors(UUID id) {
-    List<Appointment> appointments = appointmentRepository.findAllByUserId(id.toString());
-    List<DoctorInfo> doctorInfos = appointments.stream()
-            .map(appointment -> DoctorInfo.builder()
-                    .doctorId(appointment.getDoctorId())
-                    .doctorInfo(appointment.getDoctorInfo())
-                    .build())
-            .collect(Collectors.toList());
-    return doctorInfos;
-}
+        Set<String> uniqueDoctorIds = new HashSet<>();
+        List<DoctorInfo> distinctDoctorInfos = new ArrayList<>();
+
+        for (Appointment appointment : appointments) {
+            String doctorId = appointment.getDoctorId();
+            if (!uniqueDoctorIds.contains(doctorId)) {
+                uniqueDoctorIds.add(doctorId);
+                DoctorInfo doctorInfo = DoctorInfo.builder()
+                        .doctorId(appointment.getDoctorId())
+                        .doctorInfo(appointment.getDoctorInfo())
+                        .build();
+                distinctDoctorInfos.add(doctorInfo);
+            }
+        }
+
+        return distinctDoctorInfos;
+    }
+
+
+//public List<DoctorInfo> getBookedDoctors(UUID id) {
+//    List<Appointment> appointments = appointmentRepository.findAllByUserId(id.toString());
+//    List<DoctorInfo> doctorInfos = appointments.stream()
+//            .map(appointment -> DoctorInfo.builder()
+//                    .doctorId(appointment.getDoctorId())
+//                    .doctorInfo(appointment.getDoctorInfo())
+//                    .build())
+//            .collect(Collectors.toList());
+//    return doctorInfos;
+//}
 
     public DoctorInfo getDoctor(UUID id) {
         Appointment appointments = appointmentRepository.findDoctorById(id.toString());

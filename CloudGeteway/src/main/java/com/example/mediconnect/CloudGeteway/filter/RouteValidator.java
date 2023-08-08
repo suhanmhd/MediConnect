@@ -20,7 +20,10 @@ public class RouteValidator {
 
             "/user/getdepartments",
             "/user/getUserProfile",
-            "/doctor/getDoctorProfile"
+            "/doctor/getDoctorProfile",
+
+            "/appointment/getAppointmentRequests",
+             "/appointment/getTodaysAppointmentRequests"
 
 //            "/user/getDoctorByCategory/{departmentName}",
 //            "/user/getDoctorByCategory",

@@ -71,27 +71,9 @@ public class DoctorController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while processing the request");
         }
     }
-//    @PostMapping("/addBookingSlot")
-//    public ResponseEntity<Map<String, DoctorSlotDto>>updateBookingSlot(@RequestBody DoctorSlotDto  doctorSlotDto){
-//        System.out.println(doctorSlotDto);
-////        DoctorSlotDto doctorSlotDto = new DoctorSlotDto();
-//        System.out.println(doctorSlotDto);
-//        doctorService.addBookingSlot(doctorSlotDto);
-//        System.out.println("hello world");
-//        System.out.println(doctorSlotDto);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
 
-//    @GetMapping("/getBookingSlot/{docId}")
-//    public ResponseEntity<Map<String,List<SlotResponseDTO>>>getBookingSlot(@PathVariable("docId") UUID docId){
-//
-//        List<SlotResponseDTO> doctorSlotDto=doctorService.getBookingSlot(docId);
-//        System.out.println("hello world");
-//        Map<String,  List<SlotResponseDTO>> response = new HashMap<>();
-//        response.put("scheduleData",doctorSlotDto);
-//        System.out.println(doctorSlotDto);
-//        return new ResponseEntity<>(response,HttpStatus.OK);
-//    }
+
+
 
 //    @PostMapping("/updateBookingSlot")
 //    public ResponseEntity<String> updateBookingSlot(@RequestBody SlotResponseDTO slotResponseDTO) {
@@ -102,42 +84,8 @@ public class DoctorController {
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating booking slot: " + e.getMessage());
 //        }
 //    }
-//
-//    @PostMapping("/deleteBookingSlot")
-//    public ResponseEntity<Void> deleteBookingSlot(@RequestBody SlotResponseDTO doctorSlotDto) {
-//        doctorService. deleteBookingSlot(doctorSlotDto);
-//        return ResponseEntity.ok().build();
-//    }
 
 
-
-
-//    @PostMapping("/addBookingSlot")
-//    public ResponseEntity<Map<String, DoctorSlotDto>>updateBookingSlot(@RequestBody  Map<String,Object> requestBody){
-//        System.out.println(requestBody);
-//        DoctorSlotDto doctorSlotDto = new DoctorSlotDto();
-//        System.out.println(doctorSlotDto);
-//        doctorService.updateBookingSlot(doctorSlotDto);
-//        System.out.println("hello world");
-//        System.out.println(doctorSlotDto);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
-
-    //    @PostMapping("/addBookingSlot")
-//    public ResponseEntity<Map<String,Object>>updateBookingSlot(@RequestBody Map<String,Object> res){
-//        System.out.println(res);
-//
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
-//    @GetMapping("/doctors/{doctorId}/time-slots")
-//    public ResponseEntity<List<String>> getTimeSlotsByDate(@PathVariable UUID doctorId,
-//                                                           @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-//        DoctorSlotDto doctorSlotDto = new DoctorSlotDto();
-//        doctorSlotDto.setDoctor_id(doctorId);
-//
-//        List<String> timeSlots = doctorService.getTimeSlotsByDate(doctorSlotDto, date);
-//        return ResponseEntity.ok(timeSlots);
-//    }
 
 
 
@@ -156,28 +104,28 @@ public class DoctorController {
 
 
 
-    @GetMapping("/getAppointmentRequests/{docId}")
-    public ResponseEntity<Map<String,List>>getAppointmentRequest(@PathVariable("docId") UUID id){
-        Map<String,List> response = new HashMap<>();
+//    @GetMapping("/getAppointmentRequests/{docId}")
+//    public ResponseEntity<Map<String,List>>getAppointmentRequest(@PathVariable("docId") UUID id){
+//        Map<String,List> response = new HashMap<>();
 //        List<Appointment> appointmentList=doctorService.getAppointmentRequest(id);
 //        System.out.println(appointmentList);
 //        response.put("appointmentsDetails",appointmentList);
-        return  new ResponseEntity<>(response,HttpStatus.OK);
-    }
-
-
-    @GetMapping("/getTodaysAppointmentRequests/{docId}")
-    public ResponseEntity<Map<String,List>>getTodaysAppointments(@PathVariable("docId") UUID id){
-        Map<String,List> response = new HashMap<>();
-
-        List<Appointment> appointmentList=null;
-        while (appointmentList==null) {
-//            appointmentList=doctorService.getTodaysAppointments(id);
-        }
-
-        response.put("appointmentsDetails",appointmentList);
-        return  new ResponseEntity<>(response,HttpStatus.OK);
-    }
+//        return  new ResponseEntity<>(response,HttpStatus.OK);
+//    }
+//
+//
+//    @GetMapping("/getTodaysAppointmentRequests/{docId}")
+//    public ResponseEntity<Map<String,List>>getTodaysAppointments(@PathVariable("docId") UUID id){
+//        Map<String,List> response = new HashMap<>();
+//
+//        List<Appointment> appointmentList=null;
+//        while (appointmentList==null) {
+////            appointmentList=doctorService.getTodaysAppointments(id);
+//        }
+//
+//        response.put("appointmentsDetails",appointmentList);
+//        return  new ResponseEntity<>(response,HttpStatus.OK);
+//    }
 
 
 
@@ -207,16 +155,6 @@ public class DoctorController {
 
     }
 
-
-    @GetMapping("/getAvailableSlot/{doctorId}")
-    public ResponseEntity <Map<String,SlotResponseListDTO>>getAvailableSlot(@PathVariable("doctorId") UUID doctorId) {
-       SlotResponseListDTO availableSlots = userService.getAvailableSlots(doctorId);
-        Map<String,SlotResponseListDTO>response = new HashMap<>();
-        response.put("slot",availableSlots);
-        return  new ResponseEntity<>(response,HttpStatus.OK);
-
-
-    }
 
 
 

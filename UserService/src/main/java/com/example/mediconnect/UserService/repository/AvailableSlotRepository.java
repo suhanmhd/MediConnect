@@ -20,6 +20,8 @@ public interface AvailableSlotRepository extends JpaRepository<AvailableSlot, UU
 
     List<AvailableSlot> findByDoctor(DoctorCredentials doctor);
 
+    List<AvailableSlot> findByDoctorOrderByDate(DoctorCredentials doctor);
+
 
 //    AvailableSlot findByDoctorIdAndDayAndTime(UUID doctorId, String day, List<String> times);
 }

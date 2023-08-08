@@ -15,6 +15,7 @@ public class AppointmentReq {
 
     private UUID docId;
     private UUID userId;
+    private UUID slotId;
     private String userInfo;
 
     private String doctorInfo;

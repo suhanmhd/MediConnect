@@ -19,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.springframework.beans.BeanUtils.copyProperties;
 
@@ -44,6 +46,8 @@ public class DoctorService {
 
 
 
+
+
     public void saveDoctor(DoctorCredentials doctorCredentials) {
         doctorCredentials.setIsApproved("pending");
         doctorCredentials.setEnabled(true);
@@ -55,6 +59,9 @@ public class DoctorService {
 
     public void getAllDoctors() {
         List<DoctorCredentials> doctorCredentials = doctorRepository.findAll();
+
+
+
 
 
         List<Doctor> doctorResponse = new ArrayList<>();
@@ -169,82 +176,82 @@ public class DoctorService {
         BeanUtils.copyProperties(doctor, doctorCredentials, ignoredProperties);
 
 
-        // Update or create JobHistory entries
-        List<JobHistory> existingJobHistoryList = doctorCredentials.getJobHistoryList();
-        List<JobHistoryDTO> updatedJobHistoryList = doctor.getJobHistoryList();
-        for (JobHistoryDTO updatedJobHistory : updatedJobHistoryList) {
-            boolean jobHistoryExists = false;
-            for (JobHistory existingJobHistory : existingJobHistoryList) {
-                if (existingJobHistory.getId() != null && updatedJobHistory.getId() != null && existingJobHistory.getId().equals(updatedJobHistory.getId())) {
-                    // Update existing JobHistory
-                    BeanUtils.copyProperties(updatedJobHistory, existingJobHistory, "id");
-                    jobHistoryExists = true;
-                    break;
-                }
-            }
-            if (!jobHistoryExists) {
-                // Create new JobHistory
-                JobHistory newJobHistory = new JobHistory();
-                BeanUtils.copyProperties(updatedJobHistory, newJobHistory);
-                newJobHistory.setDoctor(doctorCredentials);
-                if (existingJobHistoryList == null) {
-                    existingJobHistoryList = new ArrayList<>();
-                    doctorCredentials.setJobHistoryList(existingJobHistoryList);
-                }
-
-
-                existingJobHistoryList.add(newJobHistory);
-            }
-        }
-
-        // Update or create Education entries
-        List<Education> existingEducationList = doctorCredentials.getEducationList();
-        List<EducationDTO> updatedEducationList = doctor.getEducationList();
-        for (EducationDTO updatedEducation : updatedEducationList) {
-            boolean educationExists = false;
-            for (Education existingEducation : existingEducationList) {
-                if (existingEducation.getId() != null && updatedEducation.getId() != null && existingEducation.getId().equals(updatedEducation.getId())) {
-                    // Update existing Education
-                    BeanUtils.copyProperties(updatedEducation, existingEducation, "id");
-                    educationExists = true;
-                    break;
-                }
-            }
-            if (!educationExists) {
-                // Create new Education
-                Education education = new Education();
-                BeanUtils.copyProperties(updatedEducation, education);
-
-                education.setDoctor(doctorCredentials);
-
-                if (existingEducationList == null) {
-                    existingEducationList = new ArrayList<>();
-                    doctorCredentials.setEducationList(existingEducationList);
-                    System.out.println("help" + doctorCredentials);
-                }
-                existingEducationList.add(education);
-            }
-        }
-
-        // Update or create ClinicInfo
-        ClinicInfo existingClinicInfo = doctorCredentials.getClinicInfo();
-        ClinicInfoDTO updatedClinicInfo = doctor.getClinicInfo();
-        if (updatedClinicInfo != null) {
-            if (existingClinicInfo != null) {
-                // Update existing ClinicInfo
-                BeanUtils.copyProperties(updatedClinicInfo, existingClinicInfo, "id");
-            } else {
-                // Create new ClinicInfo
-                ClinicInfo clinic = new ClinicInfo();
-
-                BeanUtils.copyProperties(updatedClinicInfo, clinic);
-                doctorCredentials.setClinicInfo(clinic);
-
-
-                clinic.setDoctor(doctorCredentials);
-                doctorCredentials.setClinicInfo(clinic);
-            }
-        }
+//        // Update or create JobHistory entries
+//        List<JobHistory> existingJobHistoryList = doctorCredentials.getJobHistoryList();
+//        List<JobHistoryDTO> updatedJobHistoryList = doctor.getJobHistoryList();
+//        for (JobHistoryDTO updatedJobHistory : updatedJobHistoryList) {
+//            boolean jobHistoryExists = false;
+//            for (JobHistory existingJobHistory : existingJobHistoryList) {
+//                if (existingJobHistory.getId() != null && updatedJobHistory.getId() != null && existingJobHistory.getId().equals(updatedJobHistory.getId())) {
+//                    // Update existing JobHistory
+//                    BeanUtils.copyProperties(updatedJobHistory, existingJobHistory, "id");
+//                    jobHistoryExists = true;
+//                    break;
+//                }
+//            }
+//            if (!jobHistoryExists) {
+//                // Create new JobHistory
+//                JobHistory newJobHistory = new JobHistory();
+//                BeanUtils.copyProperties(updatedJobHistory, newJobHistory);
+//                newJobHistory.setDoctor(doctorCredentials);
+//                if (existingJobHistoryList == null) {
+//                    existingJobHistoryList = new ArrayList<>();
+//                    doctorCredentials.setJobHistoryList(existingJobHistoryList);
+//                }
+//
+//
+//                existingJobHistoryList.add(newJobHistory);
+//            }
+//        }
+//
+//        // Update or create Education entries
+//        List<Education> existingEducationList = doctorCredentials.getEducationList();
+//        List<EducationDTO> updatedEducationList = doctor.getEducationList();
+//        for (EducationDTO updatedEducation : updatedEducationList) {
+//            boolean educationExists = false;
+//            for (Education existingEducation : existingEducationList) {
+//                if (existingEducation.getId() != null && updatedEducation.getId() != null && existingEducation.getId().equals(updatedEducation.getId())) {
+//                    // Update existing Education
+//                    BeanUtils.copyProperties(updatedEducation, existingEducation, "id");
+//                    educationExists = true;
+//                    break;
+//                }
+//            }
+//            if (!educationExists) {
+//                // Create new Education
+//                Education education = new Education();
+//                BeanUtils.copyProperties(updatedEducation, education);
+//
+//                education.setDoctor(doctorCredentials);
+//
+//                if (existingEducationList == null) {
+//                    existingEducationList = new ArrayList<>();
+//                    doctorCredentials.setEducationList(existingEducationList);
+//                    System.out.println("help" + doctorCredentials);
+//                }
+//                existingEducationList.add(education);
+//            }
+//        }
+//
+//        // Update or create ClinicInfo
+//        ClinicInfo existingClinicInfo = doctorCredentials.getClinicInfo();
+//        ClinicInfoDTO updatedClinicInfo = doctor.getClinicInfo();
+//        if (updatedClinicInfo != null) {
+//            if (existingClinicInfo != null) {
+//                // Update existing ClinicInfo
+//                BeanUtils.copyProperties(updatedClinicInfo, existingClinicInfo, "id");
+//            } else {
+//                // Create new ClinicInfo
+//                ClinicInfo clinic = new ClinicInfo();
+//
+//                BeanUtils.copyProperties(updatedClinicInfo, clinic);
+//                doctorCredentials.setClinicInfo(clinic);
+//
+//
+//                clinic.setDoctor(doctorCredentials);
+//                doctorCredentials.setClinicInfo(clinic);
+//            }
+//        }
 
         // Save the updated DoctorCredentials
         doctorRepository.save(doctorCredentials);
@@ -262,33 +269,69 @@ public class DoctorService {
 
     //fixed
 
-        public List<AvailableSlotResonseDTO> getAvailableSlots(UUID doctorId) {
-            // Find the doctor by ID
-            DoctorCredentials doctor = doctorRepository.findById(doctorId)
-                    .orElseThrow(() -> new IllegalArgumentException("Doctor with ID " + doctorId + " not found"));
+// ...
 
-            // Get all available slots for the doctor
-            List<AvailableSlot> availableSlots = availableSlotRepository.findByDoctor(doctor);
+    public List<AvailableSlotResonseDTO> getAvailableSlots(UUID doctorId) {
+        // Find the doctor by ID
+        DoctorCredentials doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new IllegalArgumentException("Doctor with ID " + doctorId + " not found"));
 
-            // Convert the entities to DTOs for the response
-            List<AvailableSlotResonseDTO> availableSlotDTOs = new ArrayList<>();
-            for (AvailableSlot availableSlot : availableSlots) {
-                List<SlotResponseDTO> slotDTOs = new ArrayList<>();
-                for (Slot slot : availableSlot.getSlots()) {
-                    SlotResponseDTO slotDTO = new SlotResponseDTO(
+        // Get all available slots for the doctor and sort them based on date
+        List<AvailableSlot> availableSlots = availableSlotRepository.findByDoctorOrderByDate(doctor);
 
-                            slot.getId(),
-                            slot.getStartTime(),
-                            slot.getEndTime(),
-                            slot.isStatus()
-                    );
-                    slotDTOs.add(slotDTO);
-                }
-                AvailableSlotResonseDTO availableSlotDTO = new AvailableSlotResonseDTO(availableSlot.getDate(), availableSlot.getDoctor().getId(), slotDTOs);
-                availableSlotDTOs.add(availableSlotDTO);
+        // Filter out slots that are before today's date
+        LocalDate today = LocalDate.now();
+        List<AvailableSlot> filteredSlots = availableSlots.stream()
+                .filter(slot -> slot.getDate().isAfter(today.minusDays(1))) // include today as well
+                .collect(Collectors.toList());
+
+        // Convert the entities to DTOs for the response
+        List<AvailableSlotResonseDTO> availableSlotDTOs = new ArrayList<>();
+        for (AvailableSlot availableSlot : filteredSlots) {
+            List<SlotResponseDTO> slotDTOs = new ArrayList<>();
+            for (Slot slot : availableSlot.getSlots()) {
+                SlotResponseDTO slotDTO = new SlotResponseDTO(
+                        slot.getId(),
+                        slot.getStartTime(),
+                        slot.getEndTime(),
+                        slot.isStatus()
+                );
+                slotDTOs.add(slotDTO);
             }
-            return availableSlotDTOs;
+            AvailableSlotResonseDTO availableSlotDTO = new AvailableSlotResonseDTO(availableSlot.getDate(), availableSlot.getDoctor().getId(), slotDTOs);
+            availableSlotDTOs.add(availableSlotDTO);
         }
+        return availableSlotDTOs;
+    }
+
+
+//        public List<AvailableSlotResonseDTO> getAvailableSlots(UUID doctorId) {
+//            // Find the doctor by ID
+//            DoctorCredentials doctor = doctorRepository.findById(doctorId)
+//                    .orElseThrow(() -> new IllegalArgumentException("Doctor with ID " + doctorId + " not found"));
+//
+//            // Get all available slots for the doctor
+//            List<AvailableSlot> availableSlots = availableSlotRepository.findByDoctorOrderByDate(doctor);
+//
+//            // Convert the entities to DTOs for the response
+//            List<AvailableSlotResonseDTO> availableSlotDTOs = new ArrayList<>();
+//            for (AvailableSlot availableSlot : availableSlots) {
+//                List<SlotResponseDTO> slotDTOs = new ArrayList<>();
+//                for (Slot slot : availableSlot.getSlots()) {
+//                    SlotResponseDTO slotDTO = new SlotResponseDTO(
+//
+//                            slot.getId(),
+//                            slot.getStartTime(),
+//                            slot.getEndTime(),
+//                            slot.isStatus()
+//                    );
+//                    slotDTOs.add(slotDTO);
+//                }
+//                AvailableSlotResonseDTO availableSlotDTO = new AvailableSlotResonseDTO(availableSlot.getDate(), availableSlot.getDoctor().getId(), slotDTOs);
+//                availableSlotDTOs.add(availableSlotDTO);
+//            }
+//            return availableSlotDTOs;
+//        }
 
 //fixed
 
@@ -303,7 +346,7 @@ public class DoctorService {
 //        }
 //        return appointmentList;
 //    }
-
+//
 //    public List<Appointment> getTodaysAppointments(UUID id) {
 //        producer.getTodaysAppointments(id);
 //

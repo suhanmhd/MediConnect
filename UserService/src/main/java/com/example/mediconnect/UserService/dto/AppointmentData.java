@@ -14,6 +14,8 @@ import java.util.UUID;
 public class AppointmentData {
 
     private UUID docId;
+
+    private UUID  slotId;
     private String date;
     private String time;
 

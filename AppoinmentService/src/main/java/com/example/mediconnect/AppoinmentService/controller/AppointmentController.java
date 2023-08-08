@@ -2,6 +2,7 @@ package com.example.mediconnect.AppoinmentService.controller;
 
 import com.example.mediconnect.AppoinmentService.dto.AppointmentStatus;
 import com.example.mediconnect.AppoinmentService.dto.DoctorInfo;
+import com.example.mediconnect.AppoinmentService.entity.Appointment;
 import com.example.mediconnect.AppoinmentService.entity.Conversation;
 import com.example.mediconnect.AppoinmentService.entity.Message;
 import com.example.mediconnect.AppoinmentService.service.AppointmentService;
@@ -79,6 +80,28 @@ public class AppointmentController {
         System.out.println(doctorInfo);
         return  new ResponseEntity<>(response,HttpStatus.OK);
     }
+
+
+    @GetMapping("/getAppointmentRequests/{docId}")
+    public ResponseEntity<Map<String,List>>getAppointmentRequest(@PathVariable("docId") UUID id){
+        Map<String,List> response = new HashMap<>();
+        List<Appointment> appointmentList=appointmentService.getAppointmentRequest(id.toString());
+        System.out.println(appointmentList);
+        response.put("appointmentsDetails",appointmentList);
+        return  new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+
+    @GetMapping("/getTodaysAppointmentRequests/{docId}")
+    public ResponseEntity<Map<String,List>>getTodaysAppointments(@PathVariable("docId") UUID id){
+        Map<String,List> response = new HashMap<>();
+
+        List<Appointment> appointmentList=appointmentService.getTodaysAppointments(id.toString());
+
+        response.put("appointmentsDetails",appointmentList);
+        return  new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
 
 
 }
